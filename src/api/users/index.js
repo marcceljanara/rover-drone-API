@@ -11,7 +11,6 @@ const usersPlugin = ({
   });
 
   app.use('/users', userRoutes(handler));
-  
 };
 
 export default usersPlugin;

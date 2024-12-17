@@ -20,6 +20,8 @@
         "no-console": "off",
         "linebreak-style": "off",
         "no-underscore-dangle": "off",
-        "camelcase": "off"
+        "camelcase": "off",
+        "import/extensions": [0]
+
     }
 }

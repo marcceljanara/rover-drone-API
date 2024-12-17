@@ -1,9 +1,9 @@
-/* eslint-disable no-underscore-dangle */
 import { nanoid } from 'nanoid';
 import bcrypt from 'bcrypt';
 import pkg from 'pg';
 import InvariantError from '../../exceptions/InvariantError.js';
 import AuthenticationError from '../../exceptions/AuthenticationError.js';
+
 const { Pool } = pkg;
 
 class UserService {

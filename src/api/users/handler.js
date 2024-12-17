@@ -1,6 +1,5 @@
-import ClientError from "../../exceptions/ClientError.js";
+import ClientError from '../../exceptions/ClientError.js';
 
-/* eslint-disable no-underscore-dangle */
 class UserHandler {
   constructor({ userService, emailManager, validator }) {
     this._userService = userService;
@@ -14,31 +13,31 @@ class UserHandler {
 
   async postRegisterUserHandler(req, res, next) {
     try {
-        this._validator.validateUserPayload(req.body);
+      this._validator.validateUserPayload(req.body);
 
-        const {
-          username, password, fullname, email,
-        } = req.body;
-        await this._userService.checkExistingUser({ email, username });
-        
-        const userId = await this._userService.registerUser({
-          username,
-          password,
-          fullname,
-          email,
-        });
-    
-        // Generate and send OTP
-        const otp = await this._userService.generateOtp(email);
-        await this._emailManager.sendOtpEmail(email, otp);
-    
-        return res.status(201).json({
-          status: 'success',
-          message: 'User berhasil didaftarkan. Silakan verifikasi email Anda.',
-          data: { userId },
-        });
+      const {
+        username, password, fullname, email,
+      } = req.body;
+      await this._userService.checkExistingUser({ email, username });
+
+      const userId = await this._userService.registerUser({
+        username,
+        password,
+        fullname,
+        email,
+      });
+
+      // Generate and send OTP
+      const otp = await this._userService.generateOtp(email);
+      await this._emailManager.sendOtpEmail(email, otp);
+
+      return res.status(201).json({
+        status: 'success',
+        message: 'User berhasil didaftarkan. Silakan verifikasi email Anda.',
+        data: { userId },
+      });
     } catch (error) {
-         // Jika error adalah ClientError, kirim ke middleware error handler
+      // Jika error adalah ClientError, kirim ke middleware error handler
       if (error instanceof ClientError) {
         return next(error);
       }
@@ -50,32 +49,59 @@ class UserHandler {
         message: 'Terjadi kesalahan pada server.',
       });
     }
-
   }
 
-  async postVerifyOtpHandler(req, res) {
-    this._validator.validateOtpPayload(req.body);
+  async postVerifyOtpHandler(req, res, next) {
+    try {
+      this._validator.validateOtpPayload(req.body);
 
-    const { email, otp } = req.body;
-    await this._userService.verifyOtp(email, otp);
+      const { email, otp } = req.body;
+      await this._userService.verifyOtp(email, otp);
 
-    return res.status(200).json({
-      status: 'success',
-      message: 'Verifikasi berhasil. Akun Anda telah aktif.',
-    });
+      return res.status(200).json({
+        status: 'success',
+        message: 'Verifikasi berhasil. Akun Anda telah aktif.',
+      });
+    } catch (error) {
+      // Jika error adalah ClientError, kirim ke middleware error handler
+      if (error instanceof ClientError) {
+        return next(error);
+      }
+
+      // Jika error bukan ClientError, beri respons error server
+      console.error(error); // Log error untuk debugging
+      return res.status(500).json({
+        status: 'error',
+        message: 'Terjadi kesalahan pada server.',
+      });
+    }
   }
 
-  async postResendOtpHandler(req, res) {
-    this._validator.validateResendOtpPayload(req.body);
+  async postResendOtpHandler(req, res, next) {
+    try {
+      this._validator.validateResendOtpPayload(req.body);
 
-    const { email } = req.body;
-    const otp = await this._userService.generateOtp(email);
-    await this._emailManager.sendOtpEmail(email, otp);
+      const { email } = req.body;
+      const otp = await this._userService.generateOtp(email);
+      await this._emailManager.sendOtpEmail(email, otp);
 
-    return res.status(200).json({
-      status: 'success',
-      message: 'Kode OTP telah dikirim ulang ke email Anda.',
-    });
+      return res.status(200).json({
+        status: 'success',
+        message: 'Kode OTP telah dikirim ulang ke email Anda.',
+      });
+    } catch (error) {
+      // Jika error adalah ClientError, kirim ke middleware error handler
+      if (error instanceof ClientError) {
+        return next(error);
+      }
+
+      // Jika error bukan ClientError, beri respons error server
+      console.error(error); // Log error untuk debugging
+      return res.status(500).json({
+        status: 'error',
+        message: 'Terjadi kesalahan pada server.',
+      });
+    }
   }
 }
 

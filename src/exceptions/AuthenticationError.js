@@ -1,4 +1,4 @@
-import ClientError from "./ClientError.js";
+import ClientError from './ClientError.js';
 
 class AuthenticationError extends ClientError {
   constructor(message) {
@@ -7,4 +7,4 @@ class AuthenticationError extends ClientError {
   }
 }
 
-export default AuthenticationError
+export default AuthenticationError;

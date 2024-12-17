@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import nodemailer from 'nodemailer';
 
 class EmailManager {
