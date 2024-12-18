@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import pkg from 'pg';
 import InvariantError from '../../exceptions/InvariantError.js';
 import AuthenticationError from '../../exceptions/AuthenticationError.js';
+import NotFoundError from '../../exceptions/NotFoundError.js';
 
 const { Pool } = pkg;
 
@@ -64,7 +65,7 @@ class UserService {
 
     const result = await this._pool.query(query);
     if (!result.rowCount) {
-      throw new InvariantError('Email tidak ditemukan');
+      throw new NotFoundError('Email tidak ditemukan');
     }
 
     const { otp_code: storedOtp, otp_expiry: otpExpiresAt } = result.rows[0];

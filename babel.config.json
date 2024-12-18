@@ -1,3 +1,8 @@
 {
-    "presets": ["@babel/preset-env"]
-  }
+  "presets": [
+    "@babel/preset-env"  // Gunakan preset-env untuk menangani ESM dan fitur ES lainnya
+  ],
+  "plugins": [
+    "@babel/plugin-transform-modules-commonjs" // Pilihan ini dapat membantu mengonversi import/export menjadi require()
+  ]
+}

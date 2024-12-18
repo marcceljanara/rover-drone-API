@@ -7,6 +7,9 @@ exports.shorthands = undefined;
  * @param pgm {import('node-pg-migrate').MigrationBuilder}
  */
 exports.up = (pgm) => {
+  // Membuat tipe ENUM untuk role
+  pgm.createType('user_roles', ['admin', 'user']);
+
   // Membuat tabel users
   pgm.createTable('users', {
     id: {
@@ -44,6 +47,11 @@ exports.up = (pgm) => {
       type: 'TIMESTAMP',
       notNull: false,
     },
+    role: {
+      type: 'user_roles',
+      notNull: true,
+      default: 'user', // Default role adalah 'user'
+    },
     created_at: {
       type: 'TIMESTAMP',
       notNull: true,
@@ -63,4 +71,7 @@ exports.up = (pgm) => {
 exports.down = (pgm) => {
   // Menghapus tabel users
   pgm.dropTable('users');
+
+  // Menghapus tipe ENUM user_roles
+  pgm.dropType('user_roles');
 };
