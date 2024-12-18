@@ -1,9 +1,9 @@
-const {
+import InvariantError from '../../exceptions/InvariantError.js';
+import {
   PostAuthenticationPayloadSchema,
   PutAuthenticationPayloadSchema,
   DeleteAuthenticationPayloadSchema,
-} = require('./schema.cjs');
-const InvariantError = require('../../exceptions/InvariantError');
+} from './schema.cjs';
 
 const AuthenticationsValidator = {
   validatePostAuthenticationPayload: (payload) => {
@@ -26,4 +26,4 @@ const AuthenticationsValidator = {
   },
 };
 
-module.exports = AuthenticationsValidator;
+export default AuthenticationsValidator;

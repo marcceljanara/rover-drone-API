@@ -1,10 +1,25 @@
 import express from 'express';
 import dotenv from 'dotenv';
 
+// plugin
 import usersPlugin from './api/users/index.js';
+import authenticationsPlugin from './api/authentications/index.js';
+
+// service
 import UserService from './services/postgres/UserServices.js';
-import EmailManager from './utils/EmailManager.js';
+import AuthenticationsService from './services/postgres/AuthenticationsService.js';
+
+// validator
 import UsersValidator from './validator/users/index.js';
+import AuthenticationsValidator from './validator/authentications/index.js';
+
+// utils
+import EmailManager from './utils/EmailManager.js';
+
+// token manager
+import TokenManager from './tokenize/TokenManager.js';
+
+// Exceptions
 import ClientError from './exceptions/ClientError.js';
 
 dotenv.config();
@@ -15,13 +30,23 @@ app.use(express.json());
 // Dependency Injection
 const userService = new UserService();
 const emailManager = new EmailManager();
+const authenticationsService = new AuthenticationsService();
 
 usersPlugin({
   app, userService, emailManager, validator: UsersValidator,
 });
 
+authenticationsPlugin({
+  app,
+  authenticationsService,
+  userService,
+  tokenManager: TokenManager,
+  validator: AuthenticationsValidator,
+});
+
 // Global Error Handling Middleware
-app.use((err, req, res) => {
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
   // Jika error merupakan instance ClientError
   if (err instanceof ClientError) {
     return res.status(err.statusCode).json({

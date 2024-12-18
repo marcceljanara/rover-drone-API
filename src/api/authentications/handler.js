@@ -1,4 +1,4 @@
-import ClientError from '../../exceptions/ClientError';
+import ClientError from '../../exceptions/ClientError.js';
 
 class AuthenticationHandler {
   constructor({
@@ -18,6 +18,7 @@ class AuthenticationHandler {
     try {
       this._validator.validatePostAuthenticationPayload(req.body);
       const { email, password } = req.body;
+      await this._userService.checkStatusAccount(email);
       const { id, role } = await this._userService.verifyUserCredential(email, password);
       const accessToken = this._tokenManager.generateAccessToken({ id, role });
       const refreshToken = this._tokenManager.generateRefreshToken({ id, role });
@@ -31,6 +32,7 @@ class AuthenticationHandler {
         },
       });
     } catch (error) {
+      console.log(error);
       if (error instanceof ClientError) {
         return next(error);
       }
@@ -58,6 +60,7 @@ class AuthenticationHandler {
         },
       });
     } catch (error) {
+      console.log(error);
       if (error instanceof ClientError) {
         return next(error);
       }

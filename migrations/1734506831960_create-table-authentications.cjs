@@ -12,10 +12,6 @@ exports.up = (pgm) => {
       notNull: true,
       default: pgm.func('current_timestamp'),
     },
-    expires_at: {
-      type: 'TIMESTAMP',
-      notNull: true, // Menambahkan waktu kedaluwarsa untuk token
-    },
   });
 };
 

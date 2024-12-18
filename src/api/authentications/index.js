@@ -1,5 +1,5 @@
-import AuthenticationHandler from './handler';
-import authenticationRoutes from './routes';
+import AuthenticationHandler from './handler.js';
+import authenticationRoutes from './routes.js';
 
 const authenticationsPlugin = ({
   app, authenticationsService, userService, tokenManager, validator,
