@@ -41,7 +41,7 @@ describe('User Schema', () => {
       expect(() => UsersValidator.validateUserPayload(payload)).toThrowError(InvariantError);
     });
 
-    it('should throw error when username not valid', () => {
+    it('should throw error when email not valid', () => {
       // Arrange
       const payload = {
         username: 'marcceljanara',
