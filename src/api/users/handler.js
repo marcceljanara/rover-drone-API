@@ -43,7 +43,6 @@ class UserHandler {
       }
 
       // Jika error bukan ClientError, beri respons error server
-      console.error(error); // Log error untuk debugging
       return res.status(500).json({
         status: 'error',
         message: 'Terjadi kesalahan pada server.',
@@ -69,7 +68,6 @@ class UserHandler {
       }
 
       // Jika error bukan ClientError, beri respons error server
-      console.error(error); // Log error untuk debugging
       return res.status(500).json({
         status: 'error',
         message: 'Terjadi kesalahan pada server.',

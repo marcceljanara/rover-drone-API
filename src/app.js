@@ -21,7 +21,7 @@ usersPlugin({
 });
 
 // Global Error Handling Middleware
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   // Jika error merupakan instance ClientError
   if (err instanceof ClientError) {
     return res.status(err.statusCode).json({
