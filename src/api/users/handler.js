@@ -1,4 +1,5 @@
 import ClientError from '../../exceptions/ClientError.js';
+import ServerError from '../../exceptions/ServerError.js';
 
 class UserHandler {
   constructor({ userService, emailManager, validator }) {
@@ -38,6 +39,9 @@ class UserHandler {
       });
     } catch (error) {
       // Jika error adalah ClientError, kirim ke middleware error handler
+      if (error instanceof ServerError) {
+        return next(error);
+      }
       if (error instanceof ClientError) {
         return next(error);
       }

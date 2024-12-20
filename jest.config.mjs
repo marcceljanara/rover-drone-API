@@ -6,4 +6,5 @@ export default {
     '/node_modules/(?!nanoid)/', // Pastikan nanoid diproses oleh babel-jest
     '/users.test.js/',
   ],
+  testEnvironment: 'node',
 };

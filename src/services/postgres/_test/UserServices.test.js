@@ -19,15 +19,17 @@ jest.mock('bcrypt');
 
 describe('UserService', () => {
   let userService;
-  let pool;
+  const pool = new Pool();
 
   beforeEach(() => {
     userService = new UserService();
-    pool = new Pool();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+  afterAll(async () => {
+    await pool.end(); // Menutup koneksi setelah semua pengujian selesai.
   });
 
   describe('registerUser', () => {

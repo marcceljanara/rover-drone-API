@@ -32,7 +32,7 @@ class AuthenticationHandler {
         },
       });
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       if (error instanceof ClientError) {
         return next(error);
       }
@@ -60,7 +60,7 @@ class AuthenticationHandler {
         },
       });
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       if (error instanceof ClientError) {
         return next(error);
       }
@@ -73,16 +73,29 @@ class AuthenticationHandler {
     }
   }
 
-  async deleteAuthenticationHandler(req, res) {
-    this._validator.validateDeleteAuthenticationPayload(req.body);
-    const { refreshToken } = req.body;
-    await this._authenticationsService.verifyRefreshToken(refreshToken);
-    await this._authenticationsService.deleteRefreshToken(refreshToken);
+  async deleteAuthenticationHandler(req, res, next) {
+    try {
+      this._validator.validateDeleteAuthenticationPayload(req.body);
+      const { refreshToken } = req.body;
+      await this._authenticationsService.verifyRefreshToken(refreshToken);
+      await this._authenticationsService.deleteRefreshToken(refreshToken);
 
-    return res.status(200).json({
-      status: 'success',
-      message: 'Refresh token berhasil dihapus',
-    });
+      return res.status(200).json({
+        status: 'success',
+        message: 'Refresh token berhasil dihapus',
+      });
+    } catch (error) {
+      // console.log(error);
+      if (error instanceof ClientError) {
+        return next(error);
+      }
+
+      // Jika error bukan ClientError, beri respons error server
+      return res.status(500).json({
+        status: 'error',
+        message: 'Terjadi kesalahan pada server.',
+      });
+    }
   }
 }
 
