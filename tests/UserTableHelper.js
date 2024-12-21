@@ -19,6 +19,18 @@ const UsersTableTestHelper = {
     await pool.query(query);
   },
 
+  async addAdmin({
+    id = 'user-54321', username = 'adminkeren', email = 'admin@gmail.com', fullname = 'Admin Ganteng', password = 'superpassword', is_verified = true, otp_code = null, otp_expiry = null, role = 'admin',
+  }) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const query = {
+      text: 'INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+      values: [id, username, email, fullname, hashedPassword,
+        is_verified, otp_code, otp_expiry, role],
+    };
+    await pool.query(query);
+  },
+
   async findUsersById(id) {
     const query = {
       text: 'SELECT * FROM users WHERE id = $1',
