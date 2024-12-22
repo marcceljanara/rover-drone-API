@@ -1,6 +1,6 @@
 import express from 'express';
-import verifyAdmin from '../../middleware/verifyAdmin';
-import verifyToken from '../../middleware/verifyToken';
+import verifyAdmin from '../../middleware/verifyAdmin.js';
+import verifyToken from '../../middleware/verifyToken.js';
 
 const adminRoutes = (handler) => {
   const router = express.Router();
@@ -9,7 +9,7 @@ const adminRoutes = (handler) => {
   router.get('/admin/management', verifyToken, verifyAdmin, handler.getAllUserHandler);
   router.get('/admin/management/:id', verifyToken, verifyAdmin, handler.getDetailUserHandler);
   router.delete('/admin/management/:id', verifyToken, verifyAdmin, handler.deleteUserHandler);
-  router.put('/admin/management/:id', verifyToken, verifyAdmin, handler.resetPasswordUserHandler);
+  router.put('/admin/management/:id', verifyToken, verifyAdmin, handler.putPasswordUserHandler);
 
   return router;
 };

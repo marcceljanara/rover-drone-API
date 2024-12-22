@@ -5,3 +5,4 @@ package-lock.json
 .idea
 config/database/test.json
 coverage
+src/utils/generateAdmin.js

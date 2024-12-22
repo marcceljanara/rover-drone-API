@@ -4,14 +4,17 @@ import dotenv from 'dotenv';
 // plugin
 import usersPlugin from '../api/users/index.js';
 import authenticationsPlugin from '../api/authentications/index.js';
+import adminsPlugin from '../api/admins/index.js';
 
 // service
 import UserService from '../services/postgres/UserServices.js';
 import AuthenticationsService from '../services/postgres/AuthenticationsService.js';
+import AdminsService from '../services/postgres/AdminsService.js';
 
 // validator
 import UsersValidator from '../validator/users/index.js';
 import AuthenticationsValidator from '../validator/authentications/index.js';
+import AdminsValidator from '../validator/admins/index.js';
 
 // utils
 import EmailManager from '../utils/EmailManager.js';
@@ -32,6 +35,7 @@ function createServer() {
   const userService = new UserService();
   const emailManager = new EmailManager();
   const authenticationsService = new AuthenticationsService();
+  const adminsService = new AdminsService();
 
   usersPlugin({
     app,
@@ -46,6 +50,13 @@ function createServer() {
     userService,
     tokenManager: TokenManager,
     validator: AuthenticationsValidator,
+  });
+
+  adminsPlugin({
+    app,
+    adminsService,
+    userService,
+    validator: AdminsValidator,
   });
 
   // Global Error Handling Middleware

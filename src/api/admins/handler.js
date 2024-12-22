@@ -11,13 +11,12 @@ class AdminHandler {
     this.getAllUserHandler = this.getAllUserHandler.bind(this);
     this.getDetailUserHandler = this.getDetailUserHandler.bind(this);
     this.deleteUserHandler = this.deleteUserHandler.bind(this);
-    this.resetPasswordUserHandler = this.resetPasswordUserHandler.bind(this);
+    this.putPasswordUserHandler = this.putPasswordUserHandler.bind(this);
   }
 
   async postRegisterUserByAdminHandler(req, res, next) {
     try {
-      this._validator.validateAdminPayload(req.body);
-
+      this._validator.validatePostRegisterUserByAdminPayload(req.body);
       const {
         username, password, fullname, email,
       } = req.body;
@@ -51,6 +50,7 @@ class AdminHandler {
 
   async getAllUserHandler(req, res, next) {
     try {
+      this._validator.validateQueryPayload(req.query);
       // Mengambil parameter limit, offset, dan search dari query string
       const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
       const page = req.query.page ? parseInt(req.query.page, 10) : 1;
@@ -95,11 +95,11 @@ class AdminHandler {
   async getDetailUserHandler(req, res, next) {
     try {
       // Mengambil parameter ID dari URL
+      this._validator.validateParamsPayload(req.params);
       const { id } = req.params;
 
       const user = await this._adminsService.getDetailUser(id);
 
-      // Mengirim respon dengan data obat
       return res.status(200).json({
         status: 'success',
         data: { user },
@@ -120,8 +120,8 @@ class AdminHandler {
 
   async deleteUserHandler(req, res, next) {
     try {
+      this._validator.validateParamsPayload(req.params);
       const { id } = req.params;
-      await this._adminsService.checkIsAdmin(id);
       await this._adminsService.deleteUser(id);
       return res.status(200).json({
         status: 'success',
@@ -141,8 +141,30 @@ class AdminHandler {
     }
   }
 
-  async resetPasswordUserHandler(){
-    
+  async putPasswordUserHandler(req, res, next) {
+    try {
+      this._validator.validateParamsPayload(req.params);
+      this._validator.validatePutPasswordUserPayload(req.body);
+      const { id } = req.params;
+      const { newPassword, confNewPassword } = req.body;
+      await this._adminsService.checkIsAdmin(id);
+      await this._adminsService.changePasswordUser(id, newPassword, confNewPassword);
+      return res.status(200).json({
+        status: 'success',
+        message: 'password user berhasil diubah',
+      });
+    } catch (error) {
+      // Jika error adalah ClientError, kirim ke middleware error handler
+      if (error instanceof ClientError) {
+        return next(error);
+      }
+
+      // Jika error bukan ClientError, beri respons error server
+      return res.status(500).json({
+        status: 'error',
+        message: 'Terjadi kesalahan pada server.',
+      });
+    }
   }
 }
 

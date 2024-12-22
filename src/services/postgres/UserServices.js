@@ -15,7 +15,8 @@ class UserService {
   async registerUser({
     username, password, fullname, email,
   }) {
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
     const id = `user-${nanoid(16)}`;
 
     const query = {
