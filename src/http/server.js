@@ -24,6 +24,7 @@ import TokenManager from '../tokenize/TokenManager.js';
 
 // Exceptions
 import ClientError from '../exceptions/ClientError.js';
+import ServerError from '../exceptions/ServerError.js';
 
 dotenv.config();
 
@@ -47,7 +48,6 @@ function createServer() {
   authenticationsPlugin({
     app,
     authenticationsService,
-    userService,
     tokenManager: TokenManager,
     validator: AuthenticationsValidator,
   });
@@ -61,6 +61,11 @@ function createServer() {
 
   // Global Error Handling Middleware
   // eslint-disable-next-line no-unused-vars
+  app.get('/cause-error', (req, res) => {
+    throw new ServerError('Unexpected error'); // Memicu error untuk pengujian
+  });
+
+  // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {
     // Jika error merupakan instance ClientError
     if (err instanceof ClientError) {
@@ -69,9 +74,6 @@ function createServer() {
         message: err.message,
       });
     }
-
-    // Error lain (500 - Internal Server Error)
-    console.error(err); // Log untuk debugging
     return res.status(500).json({
       status: 'error',
       message: 'Terjadi kesalahan pada server',

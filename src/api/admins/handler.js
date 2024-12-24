@@ -1,6 +1,3 @@
-import ClientError from '../../exceptions/ClientError.js';
-// KODE INI BELUM DIBERI VALIDATION INPUT JOI
-
 class AdminHandler {
   constructor({ adminsService, userService, validator }) {
     this._adminsService = adminsService;
@@ -35,16 +32,7 @@ class AdminHandler {
         data: { userId },
       });
     } catch (error) {
-      // Jika error adalah ClientError, kirim ke middleware error handler
-      if (error instanceof ClientError) {
-        return next(error);
-      }
-
-      // Jika error bukan ClientError, beri respons error server
-      return res.status(500).json({
-        status: 'error',
-        message: 'Terjadi kesalahan pada server.',
-      });
+      return next(error);
     }
   }
 
@@ -79,16 +67,7 @@ class AdminHandler {
         totalPages,
       });
     } catch (error) {
-      // Jika error adalah ClientError, kirim ke middleware error handler
-      if (error instanceof ClientError) {
-        return next(error);
-      }
-
-      // Jika error bukan ClientError, beri respons error server
-      return res.status(500).json({
-        status: 'error',
-        message: 'Terjadi kesalahan pada server.',
-      });
+      return next(error);
     }
   }
 
@@ -105,16 +84,7 @@ class AdminHandler {
         data: { user },
       });
     } catch (error) {
-      // Jika error adalah ClientError, kirim ke middleware error handler
-      if (error instanceof ClientError) {
-        return next(error);
-      }
-
-      // Jika error bukan ClientError, beri respons error server
-      return res.status(500).json({
-        status: 'error',
-        message: 'Terjadi kesalahan pada server.',
-      });
+      return next(error);
     }
   }
 
@@ -128,16 +98,7 @@ class AdminHandler {
         message: 'user berhasil dihapus',
       });
     } catch (error) {
-      // Jika error adalah ClientError, kirim ke middleware error handler
-      if (error instanceof ClientError) {
-        return next(error);
-      }
-
-      // Jika error bukan ClientError, beri respons error server
-      return res.status(500).json({
-        status: 'error',
-        message: 'Terjadi kesalahan pada server.',
-      });
+      return next(error);
     }
   }
 
@@ -154,16 +115,7 @@ class AdminHandler {
         message: 'password user berhasil diubah',
       });
     } catch (error) {
-      // Jika error adalah ClientError, kirim ke middleware error handler
-      if (error instanceof ClientError) {
-        return next(error);
-      }
-
-      // Jika error bukan ClientError, beri respons error server
-      return res.status(500).json({
-        status: 'error',
-        message: 'Terjadi kesalahan pada server.',
-      });
+      return next(error);
     }
   }
 }

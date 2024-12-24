@@ -1,5 +1,8 @@
 import pkg from 'pg';
+import bcrypt from 'bcrypt';
 import InvariantError from '../../exceptions/InvariantError.js';
+import NotFoundError from '../../exceptions/NotFoundError.js';
+import AuthenticationError from '../../exceptions/AuthenticationError.js';
 
 const { Pool } = pkg;
 
@@ -39,6 +42,48 @@ class AuthenticationsService {
     };
 
     await this._pool.query(query);
+  }
+
+  async verifyUserCredential(email, password) {
+    const query = {
+      text: 'SELECT id, password, role FROM users WHERE email = $1',
+      values: [email],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new AuthenticationError('Kredensial yang Anda berikan salah');
+    }
+
+    const { id, password: hashedPassword, role } = result.rows[0];
+
+    const match = await bcrypt.compare(password, hashedPassword);
+
+    if (!match) {
+      throw new AuthenticationError('Kredensial yang Anda berikan salah');
+    }
+
+    return { id, role };
+  }
+
+  async checkStatusAccount(email) {
+    const query = {
+      text: 'SELECT is_verified FROM users WHERE email = $1',
+      values: [email],
+    };
+
+    const result = await this._pool.query(query);
+    if (result.rows.length === 0) {
+      // Jika email tidak ditemukan
+      throw new NotFoundError('Email tidak ditemukan');
+    }
+    const { is_verified } = result.rows[0];
+
+    // Jika is_verified adalah false, maka lemparkan error
+    if (!is_verified) {
+      throw new AuthenticationError('Anda belum melakukan verifikasi email, silahkan lakukan verifikasi terlebih dahulu');
+    }
   }
 }
 

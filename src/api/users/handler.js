@@ -1,6 +1,3 @@
-import ClientError from '../../exceptions/ClientError.js';
-import ServerError from '../../exceptions/ServerError.js';
-
 class UserHandler {
   constructor({ userService, emailManager, validator }) {
     this._userService = userService;
@@ -38,19 +35,7 @@ class UserHandler {
         data: { userId },
       });
     } catch (error) {
-      // Jika error adalah ClientError, kirim ke middleware error handler
-      if (error instanceof ServerError) {
-        return next(error);
-      }
-      if (error instanceof ClientError) {
-        return next(error);
-      }
-
-      // Jika error bukan ClientError, beri respons error server
-      return res.status(500).json({
-        status: 'error',
-        message: 'Terjadi kesalahan pada server.',
-      });
+      return next(error);
     }
   }
 
@@ -66,16 +51,7 @@ class UserHandler {
         message: 'Verifikasi berhasil. Akun Anda telah aktif.',
       });
     } catch (error) {
-      // Jika error adalah ClientError, kirim ke middleware error handler
-      if (error instanceof ClientError) {
-        return next(error);
-      }
-
-      // Jika error bukan ClientError, beri respons error server
-      return res.status(500).json({
-        status: 'error',
-        message: 'Terjadi kesalahan pada server.',
-      });
+      return next(error);
     }
   }
 
@@ -92,17 +68,7 @@ class UserHandler {
         message: 'Kode OTP telah dikirim ulang ke email Anda.',
       });
     } catch (error) {
-      // Jika error adalah ClientError, kirim ke middleware error handler
-      if (error instanceof ClientError) {
-        return next(error);
-      }
-
-      // Jika error bukan ClientError, beri respons error server
-      console.error(error); // Log error untuk debugging
-      return res.status(500).json({
-        status: 'error',
-        message: 'Terjadi kesalahan pada server.',
-      });
+      return next(error);
     }
   }
 }

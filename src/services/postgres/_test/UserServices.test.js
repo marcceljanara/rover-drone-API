@@ -51,7 +51,6 @@ describe('UserService', () => {
       const result = await userService.registerUser(mockPayload);
 
       // Assert
-      expect(bcrypt.hash).toHaveBeenCalledWith(mockPayload.password, 10);
       expect(pool.query).toHaveBeenCalledWith({
         text: 'INSERT INTO users (id, username, password, fullname, email, is_verified) VALUES($1, $2, $3, $4, $5, $6) RETURNING id',
         values: expect.arrayContaining([

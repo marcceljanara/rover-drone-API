@@ -1,5 +1,3 @@
-import ClientError from '../../exceptions/ClientError.js';
-
 class AuthenticationHandler {
   constructor({
     authenticationsService, userService, tokenManager, validator,
@@ -18,8 +16,8 @@ class AuthenticationHandler {
     try {
       this._validator.validatePostAuthenticationPayload(req.body);
       const { email, password } = req.body;
-      await this._userService.checkStatusAccount(email);
-      const { id, role } = await this._userService.verifyUserCredential(email, password);
+      await this._authenticationsService.checkStatusAccount(email);
+      const { id, role } = await this._authenticationsService.verifyUserCredential(email, password);
       const accessToken = this._tokenManager.generateAccessToken({ id, role });
       const refreshToken = this._tokenManager.generateRefreshToken({ id, role });
       await this._authenticationsService.addRefreshToken(refreshToken);
@@ -32,15 +30,7 @@ class AuthenticationHandler {
         },
       });
     } catch (error) {
-      // console.log(error);
-      if (error instanceof ClientError) {
-        return next(error);
-      }
-
-      return res.status(500).json({
-        status: 'fail',
-        message: 'Terjadi kesalahan pada server.',
-      });
+      return next(error);
     }
   }
 
@@ -60,16 +50,7 @@ class AuthenticationHandler {
         },
       });
     } catch (error) {
-      // console.log(error);
-      if (error instanceof ClientError) {
-        return next(error);
-      }
-
-      // Jika error bukan ClientError, beri respons error server
-      return res.status(500).json({
-        status: 'error',
-        message: 'Terjadi kesalahan pada server.',
-      });
+      return next(error);
     }
   }
 
@@ -85,16 +66,7 @@ class AuthenticationHandler {
         message: 'Refresh token berhasil dihapus',
       });
     } catch (error) {
-      // console.log(error);
-      if (error instanceof ClientError) {
-        return next(error);
-      }
-
-      // Jika error bukan ClientError, beri respons error server
-      return res.status(500).json({
-        status: 'error',
-        message: 'Terjadi kesalahan pada server.',
-      });
+      return next(error);
     }
   }
 }
