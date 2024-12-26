@@ -25,9 +25,6 @@ class AdminsService {
     };
 
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
-      throw new InvariantError('Gagal menambahkan user');
-    }
     return result.rows[0].id;
   }
 
@@ -109,14 +106,11 @@ class AdminsService {
     };
 
     const result = await this._pool.query(query);
-
-    // Periksa apakah user berhasil dihapus
-    if (!result.rowCount) {
-      throw new NotFoundError('User tidak ditemukan');
-    }
+    return result.rows;
   }
 
   async changePasswordUser(id, newPassword, confPassword) {
+    await this.checkIsAdmin(id);
     if (newPassword !== confPassword) {
       throw new InvariantError('Password dan Konfirmasi Password Tidak Cocok');
     }
@@ -127,9 +121,7 @@ class AdminsService {
       values: [hashNewPassword, id],
     };
     const result = await this._pool.query(query);
-    if (result.rowCount === 0) {
-      throw new NotFoundError('User tidak ditemukan');
-    }
+    return result.rows;
   }
 }
 

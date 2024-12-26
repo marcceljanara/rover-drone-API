@@ -12,11 +12,12 @@ const UsersTableTestHelper = {
   }) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const query = {
-      text: 'INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+      text: 'INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
       values: [id, username, email, fullname, hashedPassword,
         is_verified, otp_code, otp_expiry, role],
     };
-    await pool.query(query);
+    const result = await pool.query(query);
+    return result.rows[0].id;
   },
 
   async addAdmin({
@@ -24,11 +25,12 @@ const UsersTableTestHelper = {
   }) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const query = {
-      text: 'INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+      text: 'INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
       values: [id, username, email, fullname, hashedPassword,
         is_verified, otp_code, otp_expiry, role],
     };
-    await pool.query(query);
+    const result = await pool.query(query);
+    return result.rows[0].id;
   },
 
   async findUsersById(id) {
