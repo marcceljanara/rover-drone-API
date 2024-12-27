@@ -11,64 +11,56 @@ class AdminHandler {
     this.putPasswordUserHandler = this.putPasswordUserHandler.bind(this);
   }
 
-  async postRegisterUserByAdminHandler(req, res, next) {
-    try {
-      this._validator.validatePostRegisterUserByAdminPayload(req.body);
-      const {
-        username, password, fullname, email,
-      } = req.body;
-      await this._userService.checkExistingUser({ email, username });
+  async postRegisterUserByAdminHandler(req, res) {
+    this._validator.validatePostRegisterUserByAdminPayload(req.body);
+    const {
+      username, password, fullname, email,
+    } = req.body;
+    await this._userService.checkExistingUser({ email, username });
 
-      const userId = await this._adminsService.registerUser({
-        username,
-        password,
-        fullname,
-        email,
-      });
+    const userId = await this._adminsService.registerUser({
+      username,
+      password,
+      fullname,
+      email,
+    });
 
-      return res.status(201).json({
-        status: 'success',
-        message: 'User berhasil didaftarkan oleh admin',
-        data: { userId },
-      });
-    } catch (error) {
-      return next(error);
-    }
+    return res.status(201).json({
+      status: 'success',
+      message: 'User berhasil didaftarkan oleh admin',
+      data: { userId },
+    });
   }
 
-  async getAllUserHandler(req, res, next) {
-    try {
-      this._validator.validateQueryPayload(req.query);
-      // Mengambil parameter limit, offset, dan search dari query string
-      const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-      const page = req.query.page ? parseInt(req.query.page, 10) : 1;
-      const offset = (page - 1) * limit;
-      const searchQuery = req.query.search || '';
+  async getAllUserHandler(req, res) {
+    this._validator.validateQueryPayload(req.query);
+    // Mengambil parameter limit, offset, dan search dari query string
+    const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+    const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+    const offset = (page - 1) * limit;
+    const searchQuery = req.query.search || '';
 
-      // Menyiapkan parameter pencarian
-      const searchCondition = `%${searchQuery}%`;
+    // Menyiapkan parameter pencarian
+    const searchCondition = `%${searchQuery}%`;
 
-      // Query untuk mengambil data obat
-      const users = await this._adminsService.getAllUser(searchCondition, limit, offset);
+    // Query untuk mengambil data obat
+    const users = await this._adminsService.getAllUser(searchCondition, limit, offset);
 
-      // Query untuk menghitung total data
-      const totalCount = await this._adminsService.getCountData(searchCondition);
+    // Query untuk menghitung total data
+    const totalCount = await this._adminsService.getCountData(searchCondition);
 
-      // Menghitung total halaman
-      const totalPages = Math.ceil(totalCount / limit);
+    // Menghitung total halaman
+    const totalPages = Math.ceil(totalCount / limit);
 
-      // Mengirim respon dengan data obat dan informasi halaman
-      return res.status(200).json({
-        status: 'success',
-        message: 'Data user berhasil diperoleh',
-        data: { users },
-        page,
-        limit,
-        totalPages,
-      });
-    } catch (error) {
-      return next(error);
-    }
+    // Mengirim respon dengan data obat dan informasi halaman
+    return res.status(200).json({
+      status: 'success',
+      message: 'Data user berhasil diperoleh',
+      data: { users },
+      page,
+      limit,
+      totalPages,
+    });
   }
 
   async getDetailUserHandler(req, res, next) {
