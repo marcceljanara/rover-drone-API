@@ -97,4 +97,68 @@ describe('/authentications endpoint', () => {
       expect(responseJson.message).toEqual('"password" must be a string');
     });
   });
+  describe('PUT /authentications', () => {
+    it('should return 200 and new access token', async () => {
+      // Arrange
+      const requestLoginPayload = {
+        email: 'email@gmail.com',
+        password: 'superpassword',
+      };
+      const server = createServer();
+      await UsersTableTestHelper.addUser('user-12345');
+      const loginResponse = await request(server).post('/authentications').send(requestLoginPayload);
+      const { refreshToken } = loginResponse.body.data;
+
+      // Action
+      const response = await request(server).put('/authentications').send({ refreshToken });
+
+      // Assert
+      const responseJson = response.body;
+      expect(response.statusCode).toEqual(200);
+      expect(responseJson.status).toEqual('success');
+      expect(responseJson.data.accessToken).toBeDefined();
+    });
+    it('should return 400 payload not contain refresh token', async () => {
+      // Arrange
+      const server = createServer();
+
+      // Actions
+      const response = await request(server).put('/authentications').send({});
+
+      // Assert
+      const responseJson = response.body;
+      expect(response.statusCode).toEqual(400);
+      expect(responseJson.status).toEqual('fail');
+      expect(responseJson.message).toEqual('"refreshToken" is required');
+    });
+  });
+  describe('DELETE /authentications', () => {
+    it('should response 200 if refresh token valid', async () => {
+      // Arrange
+      const server = createServer();
+      const refreshToken = 'refresh_token';
+      await AuthenticationsTableTestHelper.addToken(refreshToken);
+
+      // Action
+      const response = (await request(server).delete('/authentications').send({ refreshToken }));
+
+      // Assert
+      const responseJson = response.body;
+      expect(response.statusCode).toEqual(200);
+      expect(responseJson.status).toEqual('success');
+    });
+    it('should return 400 payload not contain refresh token', async () => {
+      // Arrange
+      const server = createServer();
+
+      // Actions
+      const response = await request(server).delete('/authentications').send({});
+
+      // Assert
+      const responseJson = response.body;
+      expect(response.statusCode).toEqual(400);
+      expect(responseJson.status).toEqual('fail');
+      expect(responseJson.message).toEqual('"refreshToken" is required');
+    });
+  });
 });

@@ -41,7 +41,6 @@ class AuthenticationHandler {
       await this._authenticationsService.verifyRefreshToken(refreshToken);
       const { id, role } = this._tokenManager.verifyRefreshToken(refreshToken);
       const accessToken = this._tokenManager.generateAccessToken({ id, role });
-
       return res.status(200).json({
         status: 'success',
         message: 'Access Token berhasil diperbarui',
