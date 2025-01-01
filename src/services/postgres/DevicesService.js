@@ -11,8 +11,8 @@ class DevicesService {
 
   async addDevice() {
     const id = `device-${nanoid(16)}`;
-    const mqttControlTopic = `control/${nanoid(12)}`;
-    const mqttSensorTopic = `sensor/${nanoid(12)}`;
+    const mqttControlTopic = `control/${id}/${nanoid(12)}`;
+    const mqttSensorTopic = `sensor/${id}/${nanoid(12)}`;
     const status = 'inactive'; // default
 
     const query = {
@@ -49,7 +49,7 @@ class DevicesService {
   }
 
   async changeMqttSensor(id) {
-    const mqttSensorTopic = `sensor/${nanoid(12)}`;
+    const mqttSensorTopic = `sensor/${id}/${nanoid(12)}`;
     const query = {
       text: 'UPDATE devices SET sensor_topic = $1 WHERE id = $2 RETURNING id',
       values: [mqttSensorTopic, id],
@@ -62,7 +62,7 @@ class DevicesService {
   }
 
   async changeMqttControl(id) {
-    const mqttControlTopic = `control/${nanoid(12)}`;
+    const mqttControlTopic = `control/${id}/${nanoid(12)}`;
     const query = {
       text: 'UPDATE devices SET control_topic = $1 WHERE id = $2 RETURNING id',
       values: [mqttControlTopic, id],

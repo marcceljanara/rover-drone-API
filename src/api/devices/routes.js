@@ -15,6 +15,7 @@ const deviceRoutes = (handler) => {
   router.put('/admin/device/:id/rental', verifyToken, verifyAdmin, handler.deleteRentalIdHandler);
 
   // User (same id) & admin (all device)
+  // PERLU DIBERI MIDDLEWARE VERIFYDEVICE!!!
   router.get('/device', verifyToken, handler.getAllDeviceHandler);
   router.get('/device/:id', verifyToken, handler.getDeviceHandler);
   router.put('/device/:id/control', verifyToken, handler.putDeviceControlHandler);
