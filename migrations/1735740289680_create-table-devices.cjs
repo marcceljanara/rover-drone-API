@@ -1,21 +1,24 @@
 exports.shorthands = undefined;
 
 exports.up = (pgm) => {
+  // Membuat tipe ENUM untuk kolom status
+  pgm.createType('device_status', ['active', 'inactive', 'maintenance', 'error']);
+
+  // Membuat tabel devices
   pgm.createTable('devices', {
     id: {
-      type: 'VARCHAR(16)',
+      type: 'VARCHAR(23)',
       notNull: true,
       primaryKey: true, // Menetapkan id sebagai primary key
     },
     rental_id: {
-      type: 'VARCHAR(16)',
+      type: 'VARCHAR(23)',
       references: '"rentals"', // Menunjukkan kolom rental_id adalah foreign key ke tabel rental
       onDelete: 'SET NULL', // Jika rental dihapus, rental_id di perangkat diset ke NULL
       default: null, // rental_id bisa bernilai NULL saat perangkat belum dialokasikan
     },
     status: {
-      type: 'ENUM',
-      values: ['active', 'inactive', 'maintenance', 'error'], // Status perangkat bisa aktif, tidak aktif, atau dalam perawatan
+      type: 'device_status', // Menggunakan tipe ENUM yang baru dibuat
       notNull: true,
     },
     last_reported_issue: {
@@ -42,5 +45,9 @@ exports.up = (pgm) => {
 };
 
 exports.down = (pgm) => {
-  pgm.dropTable('devices'); // Menghapus tabel devices
+  // Menghapus tabel devices
+  pgm.dropTable('devices');
+
+  // Menghapus tipe ENUM
+  pgm.dropType('device_status');
 };
