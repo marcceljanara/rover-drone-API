@@ -53,8 +53,8 @@ class RentalsHandler {
       const rental = await this._rentalsService.addRental({ userId, startDate, endDate }, role);
       return res.status(201).json({
         status: 'success',
-        message: 'Berhasil mengajukan penyewaan',
-        data: { rental },
+        message: `Berhasil mengajukan penyewaan, silahkan melakukan pembayaran sebesar ${rental.cost} dengan catatan menulis "Pembayaran ${rental}"`,
+        data: { id: rental.id },
       });
     } catch (error) {
       return next(error);
@@ -62,7 +62,9 @@ class RentalsHandler {
   }
 
   async getAllRentalHandler(req, res) {
-    const rentals = await this._rentalsService.getAllRental();
+    const { role } = req;
+    const userId = req.id;
+    const rentals = await this._rentalsService.getAllRental(role, userId);
     return res.status(200).json({
       status: 'success',
       data: { rentals },
@@ -71,10 +73,12 @@ class RentalsHandler {
 
   async getDetailRentalHandler(req, res, next) {
     try {
+      const { role } = req;
+      const { userId } = req.id;
       this._validator.validateParamsPayload(req.params);
       const { id } = req.params;
 
-      const rental = await this._rentalsService.getDetailRental(id);
+      const rental = await this._rentalsService.getDetailRental(id, role, userId);
       return res.status(200).json({
         status: 'success',
         data: { rental },
@@ -86,12 +90,13 @@ class RentalsHandler {
 
   async putCancelRentalHandler(req, res, next) {
     try {
-      const userId = req.role;
+      const userId = req.id;
+      const { role } = req;
       this._validator.validateParamsPayload(req.params);
       this._validator.validatePutCancelRentalPayload(req.body);
       const { id } = req.params;
       const { rentalStatus } = req.body;
-      await this._rentalsService.cancelRental({ userId, id, rentalStatus });
+      await this._rentalsService.cancelRental({ userId, id, rentalStatus }, role);
       return res.status(200).json({
         status: 'success',
         message: 'rental berhasil dibatalkan',
