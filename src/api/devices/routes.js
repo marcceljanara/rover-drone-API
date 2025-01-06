@@ -6,13 +6,14 @@ const deviceRoutes = (handler) => {
   const router = express.Router();
 
   // Admin
-  router.post('/admin/device', verifyToken, verifyAdmin, handler.postAddDeviceHandler);
-  router.delete('/admin/device/:id', verifyToken, verifyAdmin, handler.deleteDeviceHandler);
-  router.put('/admin/device/:id/status', verifyToken, verifyAdmin, handler.putStatusDeviceHandler);
-  router.put('/admin/device/:id/mqttsensor', verifyToken, verifyAdmin, handler.putMqttSensorHandler);
-  router.put('/admin/device/:id/mqttcontrol', verifyToken, verifyAdmin, handler.putMqttControlHandler);
-  router.put('/admin/device/:id/rental', verifyToken, verifyAdmin, handler.putRentalIdHandler);
-  router.put('/admin/device/:id/rental', verifyToken, verifyAdmin, handler.deleteRentalIdHandler);
+  router.post('/device', verifyToken, verifyAdmin, handler.postAddDeviceHandler);
+  router.delete('/device/:id', verifyToken, verifyAdmin, handler.deleteDeviceHandler);
+  router.put('/device/:id/status', verifyToken, verifyAdmin, handler.putStatusDeviceHandler);
+  router.put('/device/:id/mqttsensor', verifyToken, verifyAdmin, handler.putMqttSensorHandler);
+  router.put('/device/:id/mqttcontrol', verifyToken, verifyAdmin, handler.putMqttControlHandler);
+  // router.put('/device/:id/rental/add', verifyToken, verifyAdmin, handler.putRentalIdHandler);
+  // eslint-disable-next-line max-len
+  // router.put('/device/:id/rental/delete', verifyToken, verifyAdmin, handler.deleteRentalIdHandler);
 
   // User (same id) & admin (all device)
   // PERLU DIBERI MIDDLEWARE VERIFYDEVICE!!!
