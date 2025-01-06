@@ -34,6 +34,11 @@ exports.up = (pgm) => {
       notNull: true,
       check: 'cost > 0', // Biaya sewa harus lebih besar dari 0
     },
+    is_deleted: {
+      type: 'BOOLEAN',
+      notNull: true,
+      default: false,
+    },
     created_at: {
       type: 'TIMESTAMP',
       default: pgm.func('current_timestamp'),

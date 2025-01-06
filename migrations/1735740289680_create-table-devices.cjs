@@ -37,6 +37,11 @@ exports.up = (pgm) => {
       type: 'VARCHAR(255)',
       notNull: true, // Menyimpan topik untuk mengirimkan perintah kontrol
     },
+    is_deleted: {
+      type: 'BOOLEAN',
+      notNull: true,
+      default: false,
+    },
     created_at: {
       type: 'TIMESTAMP',
       default: pgm.func('current_timestamp'), // Menyimpan waktu pembuatan perangkat
