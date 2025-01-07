@@ -53,10 +53,11 @@ class RentalsHandler {
       const rental = await this._rentalsService.addRental({ userId, startDate, endDate }, role);
       return res.status(201).json({
         status: 'success',
-        message: `Berhasil mengajukan penyewaan, silahkan melakukan pembayaran sebesar ${rental.cost} dengan catatan menulis "Pembayaran ${rental}"`,
+        message: `Berhasil mengajukan penyewaan, silahkan melakukan pembayaran sebesar ${rental.cost} dengan catatan menulis (Pembayaran ${rental.id})`,
         data: { id: rental.id },
       });
     } catch (error) {
+      console.log(error);
       return next(error);
     }
   }
@@ -74,7 +75,7 @@ class RentalsHandler {
   async getDetailRentalHandler(req, res, next) {
     try {
       const { role } = req;
-      const { userId } = req.id;
+      const userId = req.id;
       this._validator.validateParamsPayload(req.params);
       const { id } = req.params;
 

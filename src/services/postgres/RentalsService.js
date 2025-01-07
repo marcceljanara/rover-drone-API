@@ -119,6 +119,20 @@ class RentalsService {
       // Validasi tanggal
       const start_date = new Date(startDate);
       const end_date = new Date(endDate);
+      const today = new Date();
+
+      // Pastikan start_date dan end_date tidak kurang dari hari ini (hari ini masih valid)
+      if (start_date < today || end_date < today) {
+        throw new InvariantError('Tanggal mulai dan tanggal akhir tidak boleh kurang dari hari ini');
+      }
+
+      // Validasi bahwa start_date maksimal 3 hari setelah hari ini
+      const maxStartDate = new Date(today);
+      maxStartDate.setDate(today.getDate() + 3); // +3 hari
+
+      if (start_date > maxStartDate) {
+        throw new InvariantError('Tanggal mulai tidak boleh lebih dari 3 hari setelah hari ini');
+      }
 
       if (end_date < start_date) {
         throw new InvariantError('tanggal akhir harus lebih besar atau sama dengan tanggal mulai');
@@ -137,9 +151,38 @@ class RentalsService {
 
       await client.query('BEGIN'); // Mulai transaksi
 
+      // Cek apakah ada perangkat yang tersedia (rental_id IS NULL atau reserved_until sudah habis)
+      const availableDeviceQuery = {
+        text: `
+          SELECT id FROM devices
+          WHERE (rental_id IS NULL AND is_deleted = FALSE) 
+            AND (reserved_until IS NULL OR reserved_until < NOW())
+          LIMIT 1
+          FOR UPDATE SKIP LOCKED
+        `,
+      };
+      const availableDeviceResult = await client.query(availableDeviceQuery);
+
+      if (availableDeviceResult.rowCount === 0) {
+        throw new NotFoundError('Tidak ada perangkat yang tersedia untuk disewakan');
+      }
+
+      const deviceId = availableDeviceResult.rows[0].id;
+
+      // Reservasi perangkat dengan TTL 30 detik
+      const reserveDeviceQuery = {
+        text: `
+          UPDATE devices
+          SET reserved_until = NOW() + INTERVAL '30 seconds'
+          WHERE id = $1
+        `,
+        values: [deviceId],
+      };
+      await client.query(reserveDeviceQuery);
+
       // Tambahkan rental
       const rentalQuery = {
-        text: 'INSERT INTO rentals (id, user_id, start_date, end_date, cost) VALUES ($1, $2, $3, $4, $5) RETURNING id, cost',
+        text: 'INSERT INTO rentals (id, user_id, start_date, end_date, cost, reserved_until) VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL \'30 seconds\') RETURNING id, cost',
         values: [id, userId, start_date, end_date, cost],
       };
       const rentalResult = await client.query(rentalQuery);
@@ -153,6 +196,7 @@ class RentalsService {
       await client.query(paymentQuery);
 
       await client.query('COMMIT'); // Commit transaksi jika semuanya sukses
+
       return rentalResult.rows[0];
     } catch (error) {
       await client.query('ROLLBACK'); // Rollback jika ada kesalahan
@@ -162,7 +206,7 @@ class RentalsService {
     }
   }
 
-  async getAllHandler(role, userId) {
+  async getAllRental(role, userId) {
     if (role === 'admin') {
       const query = {
         text: 'SELECT id, start_date, end_date, rental_status, cost FROM rentals WHERE is_deleted = FALSE',

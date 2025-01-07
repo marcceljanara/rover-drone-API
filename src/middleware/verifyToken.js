@@ -17,7 +17,6 @@ const verifyToken = async (req, res, next) => {
 
     // Verifikasi token
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY);
-
     req.id = decoded.id;
     req.role = decoded.role;
     return next();
