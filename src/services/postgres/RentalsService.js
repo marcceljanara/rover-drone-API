@@ -101,7 +101,7 @@ class RentalsService {
       }
 
       await client.query('COMMIT'); // Komit transaksi
-      return deleteResult.rows[0];
+      return deleteResult.rows[0].id;
     } catch (error) {
       await client.query('ROLLBACK'); // Rollback transaksi jika terjadi kesalahan
       throw error;

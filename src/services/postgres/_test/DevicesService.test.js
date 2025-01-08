@@ -49,7 +49,7 @@ describe('DevicesService', () => {
       // Assert
       expect(deletedDevice.id).toBe(deviceId);
       const query = {
-        text: 'SELECT * FROM devices WHERE id = $1',
+        text: 'SELECT * FROM devices WHERE id = $1 AND is_deleted = FALSE',
         values: [deviceId],
       };
       const result = await pool.query(query);
@@ -87,6 +87,7 @@ describe('DevicesService', () => {
     it('should throw NotFoundError when device not found', async () => {
       // Arrange
       const devicesService = new DevicesService();
+      
 
       // Action and Assert
       await expect(devicesService.changeStatusDevice('nonexistent-id', 'active')).rejects.toThrow(NotFoundError);

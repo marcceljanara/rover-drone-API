@@ -7,7 +7,7 @@ const rentalRoutes = (handler) => {
 
   // Admin
   router.put('/rentals/:id/status', verifyToken, verifyAdmin, handler.putStatusRentalHandler);
-  router.delete('/rentals/:id', verifyToken, verifyAdmin, handler.deleteRentalHandler);
+  router.put('/rentals/:id', verifyToken, verifyAdmin, handler.deleteRentalHandler);
 
   // User (same id)
   router.post('/rentals', verifyToken, handler.postAddRentalHandler);

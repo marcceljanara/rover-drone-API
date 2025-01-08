@@ -57,7 +57,6 @@ class RentalsHandler {
         data: { id: rental.id },
       });
     } catch (error) {
-      console.log(error);
       return next(error);
     }
   }
