@@ -87,7 +87,6 @@ describe('DevicesService', () => {
     it('should throw NotFoundError when device not found', async () => {
       // Arrange
       const devicesService = new DevicesService();
-      
 
       // Action and Assert
       await expect(devicesService.changeStatusDevice('nonexistent-id', 'active')).rejects.toThrow(NotFoundError);
@@ -190,7 +189,7 @@ describe('DevicesService', () => {
   });
 
   describe('deviceControl function', () => {
-    it('should control device correctly', async () => {
+    it('should control device on correctly', async () => {
       // Arrange
       const devicesService = new DevicesService();
       const deviceId = await devicesService.addDevice();
@@ -200,6 +199,18 @@ describe('DevicesService', () => {
 
       // Assert
       expect(device.status).toBe('active');
+      expect(device.id).toBe(deviceId);
+    });
+    it('should control device off correctly', async () => {
+      // Arrange
+      const devicesService = new DevicesService();
+      const deviceId = await devicesService.addDevice();
+
+      // Action
+      const device = await devicesService.deviceControl({ id: deviceId, action: 'off' });
+
+      // Assert
+      expect(device.status).toBe('inactive');
       expect(device.id).toBe(deviceId);
     });
 
