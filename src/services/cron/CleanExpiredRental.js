@@ -35,7 +35,7 @@ cron.schedule('* * * * * *', async () => {
     const cancelRentalResult = await client.query(cancelRentalQuery);
 
     if (cancelRentalResult.rowCount > 0) {
-      console.log(`${cancelRentalResult.rowCount} rental yang kedaluwarsa telah dibatalkan.`);
+      // console.log(`${cancelRentalResult.rowCount} rental yang kedaluwarsa telah dibatalkan.`);
     }
   } catch (error) {
     //
@@ -44,4 +44,5 @@ cron.schedule('* * * * * *', async () => {
   }
 });
 
-console.log('Cron job untuk pembersihan reservasi perangkat dan pembatalan rental telah dimulai.');
+// console.log
+// ('Cron job untuk pembersihan reservasi perangkat dan pembatalan rental telah dimulai.');

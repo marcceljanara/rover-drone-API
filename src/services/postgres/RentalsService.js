@@ -96,9 +96,6 @@ class RentalsService {
         values: [id],
       };
       const deleteResult = await client.query(deleteRentalQuery);
-      if (deleteResult.rowCount === 0) {
-        throw new NotFoundError('Rental tidak ditemukan');
-      }
 
       await client.query('COMMIT'); // Komit transaksi
       return deleteResult.rows[0].id;
