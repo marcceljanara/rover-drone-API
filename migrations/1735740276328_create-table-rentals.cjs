@@ -34,6 +34,15 @@ exports.up = (pgm) => {
       notNull: true,
       check: 'cost > 0', // Biaya sewa harus lebih besar dari 0
     },
+    is_deleted: {
+      type: 'BOOLEAN',
+      notNull: true,
+      default: false,
+    },
+    reserved_until: {
+      type: 'TIMESTAMP', // Kolom reserved_until untuk menyimpan waktu kedaluwarsa reservasi perangkat
+      default: null, // Nilai default adalah NULL, perangkat tidak terreservasi
+    },
     created_at: {
       type: 'TIMESTAMP',
       default: pgm.func('current_timestamp'),
