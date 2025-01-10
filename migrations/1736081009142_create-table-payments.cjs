@@ -37,6 +37,15 @@ exports.up = (pgm) => {
       type: 'TEXT',
       notNull: false,
     },
+    is_deleted: {
+      type: 'BOOLEAN',
+      notNull: true,
+      default: false,
+    },
+    created_at: {
+      type: 'TIMESTAMP',
+      default: pgm.func('current_timestamp'), // Menyimpan waktu pembuatan perangkat
+    },
   });
 };
 
