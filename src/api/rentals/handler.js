@@ -54,7 +54,10 @@ class RentalsHandler {
       return res.status(201).json({
         status: 'success',
         message: `Berhasil mengajukan penyewaan, silahkan melakukan pembayaran sebesar ${rental.cost} dengan catatan menulis (Pembayaran ${rental.id})`,
-        data: { id: rental.id },
+        data: {
+          id: rental.id,
+          paymentId: rental.payment_id,
+        },
       });
     } catch (error) {
       return next(error);
