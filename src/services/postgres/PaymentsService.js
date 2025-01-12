@@ -11,7 +11,7 @@ class PaymentsService {
 
   async getAllPayments() {
     const query = {
-      text: 'SELECT id, rental_id, amount, payment_status from payments',
+      text: 'SELECT id, rental_id, amount, payment_status from payments WHERE is_deleted = FALSE',
       values: [],
     };
     const result = await this._pool.query(query);
@@ -20,7 +20,7 @@ class PaymentsService {
 
   async getDetailPayment(id) {
     const query = {
-      text: 'SELECT * from payments WHERE id = $1 WHERE is_deleted = FALSE',
+      text: 'SELECT * from payments WHERE id = $1 AND is_deleted = FALSE',
       values: [id],
     };
     const result = await this._pool.query(query);

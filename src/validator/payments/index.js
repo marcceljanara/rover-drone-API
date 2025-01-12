@@ -11,7 +11,7 @@ const PaymentsValidator = {
       throw new InvariantError(validationResult.error.message);
     }
   },
-  validateputVerificationPaymentPayload: (payload) => {
+  validatePutVerificationPaymentPayload: (payload) => {
     const validationResult = putVerificationPaymentPayloadSchema.validate(payload);
     if (validationResult.error) {
       throw new InvariantError(validationResult.error.message);
