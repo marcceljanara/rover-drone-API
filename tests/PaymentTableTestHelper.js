@@ -13,6 +13,10 @@ const PaymentsTableTestHelper = {
     const result = await pool.query(query);
     return result.rows[0];
   },
+
+  async cleanTable() {
+    await pool.query('DELETE FROM payments WHERE 1=1');
+  },
 };
 
 export default PaymentsTableTestHelper;
