@@ -1,7 +1,7 @@
 class UserHandler {
-  constructor({ userService, emailManager, validator }) {
+  constructor({ userService, rabbitmqService, validator }) {
     this._userService = userService;
-    this._emailManager = emailManager;
+    this._rabbitmqService = rabbitmqService;
     this._validator = validator;
 
     this.postRegisterUserHandler = this.postRegisterUserHandler.bind(this);
@@ -27,7 +27,14 @@ class UserHandler {
 
       // Generate and send OTP
       const otp = await this._userService.generateOtp(email);
-      await this._emailManager.sendOtpEmail(email, otp);
+
+      const message = {
+        userId,
+        email,
+        otp,
+      };
+      // await this._emailManager.sendOtpEmail(email, otp);
+      await this._rabbitmqService.sendMessage('otp:register', JSON.stringify(message));
 
       return res.status(201).json({
         status: 'success',
@@ -61,7 +68,11 @@ class UserHandler {
 
       const { email } = req.body;
       const otp = await this._userService.generateOtp(email);
-      await this._emailManager.sendOtpEmail(email, otp);
+      const message = {
+        email,
+        otp,
+      };
+      await this._rabbitmqService.sendMessage('otp:register', JSON.stringify(message));
 
       return res.status(200).json({
         status: 'success',

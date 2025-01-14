@@ -8,6 +8,7 @@ import authenticationsPlugin from '../api/authentications/index.js';
 import adminsPlugin from '../api/admins/index.js';
 import rentalsPlugin from '../api/rentals/index.js';
 import devicesPlugin from '../api/devices/index.js';
+import paymentsPlugin from '../api/payments/index.js';
 
 // service
 import UserService from '../services/postgres/UserServices.js';
@@ -15,6 +16,8 @@ import AuthenticationsService from '../services/postgres/AuthenticationsService.
 import AdminsService from '../services/postgres/AdminsService.js';
 import RentalsService from '../services/postgres/RentalsService.js';
 import DevicesService from '../services/postgres/DevicesService.js';
+import PaymentsService from '../services/postgres/PaymentsService.js';
+import ProducerService from '../services/rabbitmq/ProducerService.js';
 
 // validator
 import UsersValidator from '../validator/users/index.js';
@@ -22,9 +25,10 @@ import AuthenticationsValidator from '../validator/authentications/index.js';
 import AdminsValidator from '../validator/admins/index.js';
 import RentalsValidator from '../validator/rentals/index.js';
 import DevicesValidator from '../validator/devices/index.js';
+import PaymentsValidator from '../validator/payments/index.js';
 
-// utils
-import EmailManager from '../utils/EmailManager.js';
+// // utils
+// import EmailManager from '../utils/EmailManager.js';
 
 // token manager
 import TokenManager from '../tokenize/TokenManager.js';
@@ -41,16 +45,16 @@ function createServer() {
 
   // Dependency Injection
   const userService = new UserService();
-  const emailManager = new EmailManager();
   const authenticationsService = new AuthenticationsService();
   const adminsService = new AdminsService();
   const rentalsService = new RentalsService();
   const devicesService = new DevicesService();
+  const paymentsService = new PaymentsService();
 
   usersPlugin({
     app,
     userService,
-    emailManager,
+    rabbitmqService: ProducerService,
     validator: UsersValidator,
   });
 
@@ -78,6 +82,13 @@ function createServer() {
     app,
     devicesService,
     validator: DevicesValidator,
+  });
+
+  paymentsPlugin({
+    app,
+    paymentsService,
+    rentalsService,
+    validator: PaymentsValidator,
   });
 
   // Global Error Handling Middleware

@@ -47,13 +47,13 @@ class UserService {
   async generateOtp(email) {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const query = {
-      text: 'UPDATE users SET otp_code = $1, otp_expiry = NOW() + INTERVAL \'15 minutes\' WHERE email = $2 RETURNING otp_code',
+      text: 'UPDATE users SET otp_code = $1, otp_expiry = NOW() + INTERVAL \'15 minutes\' WHERE email = $2 AND is_verified = FALSE RETURNING otp_code',
       values: [otp, email],
     };
 
     const result = await this._pool.query(query);
     if (!result.rowCount) {
-      throw new InvariantError('Email tidak ditemukan');
+      throw new InvariantError('Email tidak ditemukan atau akun telah terverifikasi');
     }
     return otp;
   }

@@ -193,7 +193,7 @@ class RentalsService {
       await client.query(paymentQuery);
 
       await client.query('COMMIT'); // Commit transaksi jika semuanya sukses
-
+      rentalResult.rows[0].payment_id = paymentId;
       return rentalResult.rows[0];
     } catch (error) {
       await client.query('ROLLBACK'); // Rollback jika ada kesalahan
