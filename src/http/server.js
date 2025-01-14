@@ -17,6 +17,7 @@ import AdminsService from '../services/postgres/AdminsService.js';
 import RentalsService from '../services/postgres/RentalsService.js';
 import DevicesService from '../services/postgres/DevicesService.js';
 import PaymentsService from '../services/postgres/PaymentsService.js';
+import ProducerService from '../services/rabbitmq/ProducerService.js';
 
 // validator
 import UsersValidator from '../validator/users/index.js';
@@ -26,8 +27,8 @@ import RentalsValidator from '../validator/rentals/index.js';
 import DevicesValidator from '../validator/devices/index.js';
 import PaymentsValidator from '../validator/payments/index.js';
 
-// utils
-import EmailManager from '../utils/EmailManager.js';
+// // utils
+// import EmailManager from '../utils/EmailManager.js';
 
 // token manager
 import TokenManager from '../tokenize/TokenManager.js';
@@ -44,7 +45,6 @@ function createServer() {
 
   // Dependency Injection
   const userService = new UserService();
-  const emailManager = new EmailManager();
   const authenticationsService = new AuthenticationsService();
   const adminsService = new AdminsService();
   const rentalsService = new RentalsService();
@@ -54,7 +54,7 @@ function createServer() {
   usersPlugin({
     app,
     userService,
-    emailManager,
+    rabbitmqService: ProducerService,
     validator: UsersValidator,
   });
 

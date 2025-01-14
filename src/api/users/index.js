@@ -2,11 +2,11 @@ import UserHandler from './handler.js';
 import userRoutes from './routes.js';
 
 const usersPlugin = ({
-  app, userService, emailManager, validator,
+  app, userService, rabbitmqService, validator,
 }) => {
   const handler = new UserHandler({
     userService,
-    emailManager,
+    rabbitmqService,
     validator,
   });
 
