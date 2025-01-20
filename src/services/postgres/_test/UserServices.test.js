@@ -118,7 +118,7 @@ describe('UserService', () => {
       // Assert
       expect(otp).toHaveLength(6);
       expect(pool.query).toHaveBeenCalledWith({
-        text: 'UPDATE users SET otp_code = $1, otp_expiry = NOW() + INTERVAL \'15 minutes\' WHERE email = $2 RETURNING otp_code',
+        text: 'UPDATE users SET otp_code = $1, otp_expiry = NOW() + INTERVAL \'15 minutes\' WHERE email = $2 AND is_verified = FALSE RETURNING otp_code',
         values: [expect.any(String), 'test@example.com'],
       });
     });

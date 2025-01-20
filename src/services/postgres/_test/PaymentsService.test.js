@@ -52,6 +52,36 @@ describe('PaymentsService', () => {
     await PaymentsTableTestHelper.cleanTable();
   });
 
+  describe('getUserByPaymentId function', () => {
+    it('should return user data when payment exists', async () => {
+      // Arrange
+      const rentalsService = new RentalsService();
+      const paymentsService = new PaymentsService();
+      const user = await UsersTableTestHelper.addUser({ id: 'user-123', email: 'user@example.com', fullname: 'John Doe' });
+      await DevicesTableTestHelper.addDevice({ id: 'device-123' });
+      await DevicesTableTestHelper.addDevice({ id: 'device-456' });
+      const { payment_id } = await rentalsService.addRental(addRentalPayload(user), 'user');
+
+      // Action
+      const userData = await paymentsService.getUserByPaymentId(payment_id);
+
+      // Assert
+      expect(userData.user_id).toBe(user);
+      expect(userData.email).toBe('user@example.com');
+      expect(userData.fullname).toBe('John Doe');
+    });
+
+    it('should throw NotFoundError when payment not found', async () => {
+      // Arrange
+      const paymentsService = new PaymentsService();
+      const nonExistingPaymentId = 'non-existing-payment-id';
+
+      // Action & Assert
+      await expect(paymentsService
+        .getUserByPaymentId(nonExistingPaymentId)).rejects.toThrow(NotFoundError);
+    });
+  });
+
   describe('getAllPayments function', () => {
     it('should return all payments', async () => {
       // Arrange

@@ -46,7 +46,7 @@ class PaymentsService {
       : await this._pool.query(query);
 
     if (!rental.rows.length) {
-      throw new Error('User not found for the payment.');
+      throw new NotFoundError('User not found for the payment.');
     }
 
     return rental.rows[0]; // Return user data
