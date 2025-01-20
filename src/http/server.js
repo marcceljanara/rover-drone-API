@@ -88,6 +88,7 @@ function createServer() {
     app,
     paymentsService,
     rentalsService,
+    rabbitmqService: ProducerService,
     validator: PaymentsValidator,
   });
 

@@ -30,6 +30,28 @@ class PaymentsService {
     return result.rows[0];
   }
 
+  async getUserByPaymentId(paymentId, transaction = null) {
+    const query = {
+      text: `
+      SELECT r.user_id, u.email, u.fullname 
+      FROM rentals r
+      JOIN payments p ON p.rental_id = r.id
+      JOIN users u ON u.id = r.user_id
+      WHERE p.id = $1
+      `,
+      values: [paymentId],
+    };
+    const rental = transaction
+      ? await transaction.query(query.text, query.values)
+      : await this._pool.query(query);
+
+    if (!rental.rows.length) {
+      throw new Error('User not found for the payment.');
+    }
+
+    return rental.rows[0]; // Return user data
+  }
+
   /**
    * Verifikasi pembayaran berdasarkan ID dan memperbarui data pembayaran.
    * @param {Object} payload - Objek berisi data pembayaran.

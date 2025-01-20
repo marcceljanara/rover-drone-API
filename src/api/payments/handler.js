@@ -1,8 +1,11 @@
 class PaymentsHandler {
-  constructor({ paymentsService, rentalsService, validator }) {
+  constructor({
+    paymentsService, rentalsService, rabbitmqService, validator,
+  }) {
     this._paymentsService = paymentsService;
     this._rentalsService = rentalsService;
     this._validator = validator;
+    this._rabbitmqService = rabbitmqService;
 
     this.getAllPaymentsHandler = this.getAllPaymentsHandler.bind(this);
     this.getDetailPaymentHandler = this.getDetailPaymentHandler.bind(this);
@@ -58,6 +61,14 @@ class PaymentsHandler {
         const rental = await this._rentalsService
           .changeStatusRental(payment.rental_id, RENTAL_STATUS_ACTIVE);
 
+        const user = await this._paymentsService.getUserByPaymentId(id, transaction);
+        const message = {
+          userId: user.user_id,
+          email: user.email,
+          fullname: user.fullname,
+        };
+        await this._rabbitmqService.sendMessage('payment:success', JSON.stringify(message));
+
         // Return nilai untuk memastikan transaksi mengembalikan data
         return {
           payment,
@@ -72,6 +83,7 @@ class PaymentsHandler {
       });
     } catch (error) {
       // Tangani error
+      console.log(error);
       return next(error);
     }
   }

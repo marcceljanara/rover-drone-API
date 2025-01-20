@@ -11,25 +11,29 @@ class AdminHandler {
     this.putPasswordUserHandler = this.putPasswordUserHandler.bind(this);
   }
 
-  async postRegisterUserByAdminHandler(req, res) {
-    this._validator.validatePostRegisterUserByAdminPayload(req.body);
-    const {
-      username, password, fullname, email,
-    } = req.body;
-    await this._userService.checkExistingUser({ email, username });
+  async postRegisterUserByAdminHandler(req, res, next) {
+    try {
+      this._validator.validatePostRegisterUserByAdminPayload(req.body);
+      const {
+        username, password, fullname, email,
+      } = req.body;
+      await this._userService.checkExistingUser({ email, username });
 
-    const userId = await this._adminsService.registerUser({
-      username,
-      password,
-      fullname,
-      email,
-    });
+      const userId = await this._adminsService.registerUser({
+        username,
+        password,
+        fullname,
+        email,
+      });
 
-    return res.status(201).json({
-      status: 'success',
-      message: 'User berhasil didaftarkan oleh admin',
-      data: { userId },
-    });
+      return res.status(201).json({
+        status: 'success',
+        message: 'User berhasil didaftarkan oleh admin',
+        data: { userId },
+      });
+    } catch (error) {
+      return next(error);
+    }
   }
 
   async getAllUserHandler(req, res) {
