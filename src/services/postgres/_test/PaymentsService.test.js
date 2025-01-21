@@ -57,7 +57,7 @@ describe('PaymentsService', () => {
       // Arrange
       const rentalsService = new RentalsService();
       const paymentsService = new PaymentsService();
-      const user = await UsersTableTestHelper.addUser({ id: 'user-123', email: 'user@example.com', fullname: 'John Doe' });
+      const user = await UsersTableTestHelper.addUser({ id: 'user-123000', email: 'user@example.com', fullname: 'John Doe' });
       await DevicesTableTestHelper.addDevice({ id: 'device-123' });
       await DevicesTableTestHelper.addDevice({ id: 'device-456' });
       const { payment_id } = await rentalsService.addRental(addRentalPayload(user), 'user');

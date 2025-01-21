@@ -1,12 +1,40 @@
 import pkg from 'pg';
 import dotenv from 'dotenv';
 import DevicesService from '../DevicesService.js';
+import RentalsService from '../RentalsService.js';
 import NotFoundError from '../../../exceptions/NotFoundError.js';
+import UsersTableTestHelper from '../../../../tests/UserTableHelper.js';
 
 dotenv.config();
 
 const { Pool } = pkg;
 const pool = new Pool();
+
+const addRentalPayload = ((userId) => {
+  const today = new Date();
+  const tommorow = new Date(today);
+  const threeDaysLater = new Date(today);
+
+  // Sent startDate menjadi besok
+  tommorow.setDate(today.getDate() + 1);
+
+  // Set endDate menjadi 3 hari setelah hari ini
+  threeDaysLater.setDate(today.getDate() + 3);
+
+  // Format tanggal menjadi YYYY-MM-DD
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Bulan dimulai dari 0
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  return {
+    userId, // Ganti dengan ID user dinamis
+    startDate: formatDate(tommorow),
+    endDate: formatDate(threeDaysLater),
+  };
+});
 
 describe('DevicesService', () => {
   afterAll(async () => {
@@ -152,75 +180,153 @@ describe('DevicesService', () => {
   });
 
   describe('getDevice function', () => {
-    it('should return device details correctly', async () => {
+    it('should return device details correctly by admin', async () => {
       // Arrange
       const devicesService = new DevicesService();
       const deviceId = await devicesService.addDevice();
 
       // Action
-      const device = await devicesService.getDevice(deviceId);
+      const device = await devicesService.getDevice('admin-123', 'admin', deviceId);
+
+      // Assert
+      expect(device.id).toBe(deviceId);
+    });
+    it('should return device details correctly by user authenticated', async () => {
+      // Arrange
+      const devicesService = new DevicesService();
+      const rentalsService = new RentalsService();
+      const user1 = await UsersTableTestHelper.addUser({ id: 'user-1234567', username: 'otng123', email: 'totonggg@gmail.com' });
+      const deviceId = await devicesService.addDevice();
+      const { id } = await rentalsService.addRental(addRentalPayload(user1), 'user');
+      await rentalsService.changeStatusRental(id, 'active');
+
+      // Action
+      const device = await devicesService.getDevice(user1, 'user', deviceId);
 
       // Assert
       expect(device.id).toBe(deviceId);
     });
 
-    it('should throw NotFoundError when device not found', async () => {
+    it('should throw NotFoundError when device not found by admin', async () => {
       // Arrange
       const devicesService = new DevicesService();
 
       // Action and Assert
-      await expect(devicesService.getDevice('nonexistent-id')).rejects.toThrow(NotFoundError);
+      await expect(devicesService.getDevice('admin-123', 'admin', 'nonexistent-id')).rejects.toThrow(NotFoundError);
+    });
+
+    it('should throw NotFoundError when device not found by user', async () => {
+      // Arrange
+      const devicesService = new DevicesService();
+
+      // Action and Assert
+      await expect(devicesService.getDevice('user-123', 'user', 'nonexistent-id')).rejects.toThrow(NotFoundError);
     });
   });
 
   describe('getAllDevice function', () => {
-    it('should return all devices', async () => {
+    it('should return all devices by admin', async () => {
       // Arrange
       const devicesService = new DevicesService();
       await devicesService.addDevice();
       await devicesService.addDevice();
 
       // Action
-      const devices = await devicesService.getAllDevice();
+      const devices = await devicesService.getAllDevice('admin-123', 'admin');
 
       // Assert
       expect(devices).toHaveLength(2);
     });
+    it('should return all devices by user autheticated', async () => {
+      // Arrange
+      const devicesService = new DevicesService();
+      const rentalsService = new RentalsService();
+      const user1 = await UsersTableTestHelper.addUser({ id: 'user-123' });
+      await devicesService.addDevice();
+      const { id } = await rentalsService.addRental(addRentalPayload(user1), 'user');
+      await rentalsService.changeStatusRental(id, 'active');
+
+      // Action
+      const devices = await devicesService.getAllDevice(user1, 'user');
+
+      // Assert
+      expect(devices).toHaveLength(1);
+    });
   });
 
   describe('deviceControl function', () => {
-    it('should control device on correctly', async () => {
+    it('should control device on correctly by admin', async () => {
       // Arrange
       const devicesService = new DevicesService();
       const deviceId = await devicesService.addDevice();
 
       // Action
-      const device = await devicesService.deviceControl({ id: deviceId, action: 'on' });
+      const device = await devicesService.deviceControl('admin-123', 'admin', { id: deviceId, action: 'on' });
 
       // Assert
       expect(device.status).toBe('active');
       expect(device.id).toBe(deviceId);
     });
-    it('should control device off correctly', async () => {
+    it('should control device off correctly by admin', async () => {
       // Arrange
       const devicesService = new DevicesService();
       const deviceId = await devicesService.addDevice();
 
       // Action
-      const device = await devicesService.deviceControl({ id: deviceId, action: 'off' });
+      const device = await devicesService.deviceControl('admin-123', 'admin', { id: deviceId, action: 'off' });
+
+      // Assert
+      expect(device.status).toBe('inactive');
+      expect(device.id).toBe(deviceId);
+    });
+    it('should control device on correctly by user', async () => {
+      // Arrange
+      const devicesService = new DevicesService();
+      const rentalsService = new RentalsService();
+      const user1 = await UsersTableTestHelper.addUser({ id: 'user-111', username: 'user111', email: 'user111@gmail.com' });
+      const deviceId = await devicesService.addDevice();
+      const { id } = await rentalsService.addRental(addRentalPayload(user1), 'user');
+      await rentalsService.changeStatusRental(id, 'active');
+
+      // Action
+      const device = await devicesService.deviceControl(user1, 'user', { id: deviceId, action: 'on' });
+
+      // Assert
+      expect(device.status).toBe('active');
+      expect(device.id).toBe(deviceId);
+    });
+    it('should control device off correctly by user', async () => {
+      // Arrange
+      const devicesService = new DevicesService();
+      const rentalsService = new RentalsService();
+      const user1 = await UsersTableTestHelper.addUser({ id: 'user-000', username: 'user000', email: 'user000@gmail.com' });
+      const deviceId = await devicesService.addDevice();
+      const { id } = await rentalsService.addRental(addRentalPayload(user1), 'user');
+      await rentalsService.changeStatusRental(id, 'active');
+
+      // Action
+      const device = await devicesService.deviceControl(user1, 'user', { id: deviceId, action: 'off' });
 
       // Assert
       expect(device.status).toBe('inactive');
       expect(device.id).toBe(deviceId);
     });
 
-    it('should throw not found error when device not exist', async () => {
+    it('should throw not found error when device not exist by admin', async () => {
       // Arrange
       const devicesService = new DevicesService();
       const deviceId = 'device-notexist';
 
       // Action and Asser
-      await expect(devicesService.deviceControl({ id: deviceId, action: 'on' })).rejects.toThrow(NotFoundError);
+      await expect(devicesService.deviceControl('admin-123', 'admin', { id: deviceId, action: 'on' })).rejects.toThrow(NotFoundError);
+    });
+    it('should throw not found error when device not exist by user authenticated', async () => {
+      // Arrange
+      const devicesService = new DevicesService();
+      const deviceId = 'device-notexist';
+
+      // Action and Asser
+      await expect(devicesService.deviceControl('user-123', 'user', { id: deviceId, action: 'on' })).rejects.toThrow(NotFoundError);
     });
   });
 });
