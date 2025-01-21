@@ -74,66 +74,94 @@ class DevicesService {
     return result.rows[0];
   }
 
-  // async addRentalId(id, rentalId) {
-  //   const query = {
-  //     text: 'UPDATE devices SET rental_id = $1 WHERE id = $2 RETURNING id',
-  //     values: [rentalId, id],
-  //   };
-  //   const result = await this._pool.query(query);
-  //   if (!result.rowCount) {
-  //     throw new NotFoundError('device tidak ditemukan');
-  //   }
-  //   return result.rows[0];
-  // }
+  async getAllDevice(userId, role) {
+    // Jika role adalah admin, user dapat mengakses semua device
+    if (role === 'admin') {
+      const query = {
+        text: 'SELECT id, rental_id, status, last_reported_issue, last_active FROM devices WHERE is_deleted = FALSE',
+      };
+      const result = await this._pool.query(query);
+      return result.rows;
+    }
 
-  // async deleteRentalId(id) {
-  //   const query = {
-  //     text: 'UPDATE devices SET rental_id = NULL WHERE rental_id = $1 RETURNING id',
-  //     values: [id],
-  //   };
-  //   const result = await this._pool.query(query);
-
-  //   if (!result.rowCount) {
-  //     throw new NotFoundError('Perangkat dengan rental_id tersebut tidak ditemukan');
-  //   }
-
-  //   return result.rows[0]; // Mengembalikan ID perangkat yang diupdate
-  // }
-
-  async getAllDevice() {
-    // Perbaiki authorisasi kode
-  // ini dengan req.id dari middleware setelah buat fitur rentals
+    // Untuk user biasa, hanya akses device berdasarkan rental aktif miliknya
     const query = {
-      text: 'SELECT id, rental_id, status, last_reported_issue, last_active FROM devices WHERE is_deleted = FALSE',
+      text: `
+        SELECT devices.id, devices.rental_id, devices.status, devices.last_reported_issue, devices.last_active
+        FROM devices
+        INNER JOIN rentals ON devices.rental_id = rentals.id
+        WHERE rentals.user_id = $1 AND rentals.rental_status = 'active' AND devices.is_deleted = FALSE
+      `,
+      values: [userId],
     };
     const result = await this._pool.query(query);
     return result.rows;
   }
 
-  async getDevice(id) {
-    // Perbaiki authorisasi kode
-  // ini dengan req.id dari middleware setelah buat fitur rentals
+  async getDevice(userId, role, deviceId) {
+    // Jika role adalah admin, user dapat mengakses detail semua device
+    if (role === 'admin') {
+      const query = {
+        text: 'SELECT * FROM devices WHERE id = $1 AND is_deleted = FALSE',
+        values: [deviceId],
+      };
+      const result = await this._pool.query(query);
+      if (!result.rowCount) {
+        throw new NotFoundError('Device tidak ditemukan');
+      }
+      return result.rows[0];
+    }
+
+    // Untuk user biasa, validasi kepemilikan device
     const query = {
-      text: 'SELECT * FROM devices WHERE id = $1 AND is_deleted = FALSE',
-      values: [id],
+      text: `
+        SELECT devices.* 
+        FROM devices
+        INNER JOIN rentals ON devices.rental_id = rentals.id
+        WHERE devices.id = $1 AND rentals.user_id = $2 AND rentals.rental_status = 'active' AND devices.is_deleted = FALSE
+      `,
+      values: [deviceId, userId],
     };
     const result = await this._pool.query(query);
     if (!result.rowCount) {
-      throw new NotFoundError('device tidak ditemukan');
+      throw new NotFoundError('Device tidak ditemukan');
     }
     return result.rows[0];
   }
 
-  async deviceControl({ id, action }) { // Perbaiki authorisasi kode
-  // ini dengan req.id dari middleware setelah buat fitur rentals
+  async deviceControl(userId, role, { id, action }) {
     const status = action === 'on' ? 'active' : 'inactive';
+
+    // Jika role adalah admin, user dapat mengontrol semua device
+    if (role === 'admin') {
+      const query = {
+        text: 'UPDATE devices SET status = $1 WHERE id = $2 AND is_deleted = FALSE RETURNING id, status',
+        values: [status, id],
+      };
+      const result = await this._pool.query(query);
+      if (!result.rowCount) {
+        throw new NotFoundError('Device tidak ditemukan');
+      }
+      return result.rows[0];
+    }
+
+    // Untuk user biasa, validasi kepemilikan device
     const query = {
-      text: 'UPDATE devices SET status = $1 WHERE id = $2 AND is_deleted = FALSE RETURNING id, status',
-      values: [status, id],
+      text: `
+        UPDATE devices 
+        SET status = $1 
+        WHERE id = $2 
+        AND rental_id = (
+          SELECT id FROM rentals WHERE user_id = $3 AND rental_status = 'active'
+        ) 
+        AND is_deleted = FALSE 
+        RETURNING id, status
+      `,
+      values: [status, id, userId],
     };
     const result = await this._pool.query(query);
     if (!result.rowCount) {
-      throw new NotFoundError('device tidak ditemukan');
+      throw new NotFoundError('Device tidak ditemukan atau Anda tidak memiliki akses');
     }
     return result.rows[0];
   }

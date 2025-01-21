@@ -85,7 +85,10 @@ class DevicesHandler {
   }
 
   async getAllDeviceHandler(req, res) {
-    const devices = await this._devicesService.getAllDevice();
+    const userId = req.id;
+    const { role } = req;
+    const devices = await this._devicesService.getAllDevice(userId, role);
+    console.log(userId, role);
     return res.status(200).json({
       status: 'success',
       message: 'data device berhasil diperoleh',
@@ -95,10 +98,12 @@ class DevicesHandler {
 
   async getDeviceHandler(req, res, next) {
     try {
+      const userId = req.id;
+      const { role } = req;
       this._validator.validateParamsPayload(req.params);
       const { id } = req.params;
 
-      const device = await this._devicesService.getDevice(id);
+      const device = await this._devicesService.getDevice(userId, role, id);
 
       return res.status(200).json({
         status: 'success',
@@ -111,11 +116,13 @@ class DevicesHandler {
 
   async putDeviceControlHandler(req, res, next) {
     try {
+      const userId = req.id;
+      const { role } = req;
       this._validator.validateParamsPayload(req.params);
       this._validator.validatePutDeviceControlPayload(req.body);
       const { id } = req.params;
       const { command, action } = req.body;
-      const response = await this._devicesService.deviceControl({
+      const response = await this._devicesService.deviceControl(userId, role, {
         id, command, action,
       });
       return res.status(200).json({
