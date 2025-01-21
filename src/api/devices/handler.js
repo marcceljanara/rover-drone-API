@@ -9,8 +9,6 @@ class DevicesHandler {
     this.putStatusDeviceHandler = this.putStatusDeviceHandler.bind(this);
     this.putMqttSensorHandler = this.putMqttSensorHandler.bind(this);
     this.putMqttControlHandler = this.putMqttControlHandler.bind(this);
-    // this.putRentalIdHandler = this.putRentalIdHandler.bind(this);
-    // this.deleteRentalIdHandler = this.deleteRentalIdHandler.bind(this);
 
     // User and admin
     this.getAllDeviceHandler = this.getAllDeviceHandler.bind(this);
@@ -85,36 +83,6 @@ class DevicesHandler {
       return next(error);
     }
   }
-
-  // async putRentalIdHandler(req, res, next) {
-  //   try {
-  //     this._validator.validateParamsPayload(req.params);
-  //     this._validator.validatePutRentalIdPayload(req.body);
-  //     const { id } = req.params;
-  //     const { rental_id } = req.body;
-  //     await this._devicesService.addRentalId(id, rental_id);
-  //     return res.status(200).json({
-  //       status: 'success',
-  //       message: 'rental_id berhasil diubah',
-  //     });
-  //   } catch (error) {
-  //     console.log(error);
-  //     return next(error);
-  //   }
-  // }
-
-  // async deleteRentalIdHandler(req, res, next) {
-  //   try {
-  //     const { id } = req.params;
-  //     await this._devicesService.deleteRentalId(id);
-  //     return res.status(200).json({
-  //       status: 'success',
-  //       message: 'rental_id berhasil dihapus',
-  //     });
-  //   } catch (error) {
-  //     return next(error);
-  //   }
-  // }
 
   async getAllDeviceHandler(req, res) {
     const devices = await this._devicesService.getAllDevice();
