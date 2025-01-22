@@ -14,6 +14,9 @@ class DevicesHandler {
     this.getAllDeviceHandler = this.getAllDeviceHandler.bind(this);
     this.getDeviceHandler = this.getDeviceHandler.bind(this);
     this.putDeviceControlHandler = this.putDeviceControlHandler.bind(this);
+    this.getSensorDataHandler = this.getSensorDataHandler.bind(this);
+    this.getSensorDataLimitHandler = this.getSensorDataLimitHandler.bind(this);
+    this.getSensorDataDownloadHandler = this.getSensorDataDownloadHandler.bind(this);
   }
 
   async postAddDeviceHandler(req, res) {
@@ -131,6 +134,63 @@ class DevicesHandler {
       });
     } catch (error) {
       return next(error);
+    }
+  }
+
+  async getSensorDataHandler(req, res, next) {
+    try {
+      this._validator.validateParamsPayload(req.params);
+      this._validator.validateQuerySensorPayload(req.query);
+      const { id } = req.params;
+      const userId = req.id;
+      const { role } = req;
+      const interval = req.query.interval || '1h';
+      const sensors = await this._devicesService.getSensorData(userId, role, id, interval);
+      return res.status(200).json({
+        status: 'success',
+        data: { sensors },
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async getSensorDataLimitHandler(req, res, next) {
+    try {
+      this._validator.validateParamsPayload(req.params);
+      this._validator.validateQueryLimitPayload(req.query);
+      const { id } = req.params;
+      const userId = req.id;
+      const { role } = req;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const sensors = await this._devicesService.getSensorDataLimit(userId, role, id, limit);
+      return res.status(200).json({
+        status: 'success',
+        data: { sensors },
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async getSensorDataDownloadHandler(req, res) {
+    try {
+      this._validator.validateQuerySensorDownloadPayload(req.query);
+      this._validator.validateParamsPayload(req.params);
+      const { id } = req.params;
+      const userId = req.id;
+      const { role } = req;
+      const interval = req.query.interval || '1h';
+      // Memanggil service untuk mendapatkan data sensor dalam format CSV
+      const csvData = await this._devicesService.getSensorDataDownload(userId, role, id, interval);
+
+      // Menyusun header file CSV dan mengirimkan sebagai response
+      res.setHeader('Content-Disposition', `attachment; filename="sensor_data_${id}_${interval}.csv"`);
+      res.setHeader('Content-Type', 'text/csv');
+      res.send(csvData); // Mengirim file CSV
+    } catch (error) {
+      console.error('Error in getSensorDataDownloadHandler:', error.message);
+      res.status(500).json({ error: 'Failed to generate CSV for sensor data' });
     }
   }
 }
