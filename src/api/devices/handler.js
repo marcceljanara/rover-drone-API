@@ -173,7 +173,7 @@ class DevicesHandler {
     }
   }
 
-  async getSensorDataDownloadHandler(req, res) {
+  async getSensorDataDownloadHandler(req, res, next) {
     try {
       this._validator.validateQuerySensorDownloadPayload(req.query);
       this._validator.validateParamsPayload(req.params);
@@ -187,10 +187,9 @@ class DevicesHandler {
       // Menyusun header file CSV dan mengirimkan sebagai response
       res.setHeader('Content-Disposition', `attachment; filename="sensor_data_${id}_${interval}.csv"`);
       res.setHeader('Content-Type', 'text/csv');
-      res.send(csvData); // Mengirim file CSV
+      return res.status(200).send(csvData); // Mengirim file CSV
     } catch (error) {
-      console.error('Error in getSensorDataDownloadHandler:', error.message);
-      res.status(500).json({ error: 'Failed to generate CSV for sensor data' });
+      return next(error);
     }
   }
 }
