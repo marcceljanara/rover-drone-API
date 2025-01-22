@@ -292,10 +292,10 @@ class DevicesService {
           SELECT * 
           FROM sensordata 
           WHERE device_id = $1 
-          AND timestamp >= NOW() - INTERVAL $2
+          AND timestamp >= NOW() - INTERVAL '${sqlInterval}'
           ORDER BY timestamp DESC
         `,
-        values: [id, sqlInterval],
+        values: [id],
       };
     } else {
       // Query untuk user biasa: berdasarkan user_id, device_id, dan interval
@@ -307,10 +307,10 @@ class DevicesService {
           INNER JOIN rentals r ON d.rental_id = r.id
           WHERE r.user_id = $1 
           AND sd.device_id = $2 
-          AND sd.timestamp >= NOW() - INTERVAL $3
+          AND sd.timestamp >= NOW() - INTERVAL '${sqlInterval}'
           ORDER BY sd.timestamp DESC
         `,
-        values: [userId, id, sqlInterval],
+        values: [userId, id],
       };
     }
     const result = await this._pool.query(query);
