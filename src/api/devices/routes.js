@@ -16,9 +16,9 @@ const deviceRoutes = (handler) => {
   router.get('/devices', verifyToken, handler.getAllDeviceHandler);
   router.get('/devices/:id', verifyToken, handler.getDeviceHandler);
   router.put('/devices/:id/control', verifyToken, handler.putDeviceControlHandler);
-  router.get('/devices/:id/sensors/interval', verifyToken, handler.getSensorDataHandler);
-  router.get('/devices/:id/sensors/limitdata', verifyToken, handler.getSensorDataLimitHandler);
-  router.get('/devices/:id/sensors/download', verifyToken, handler.getSensorDataDownloadHandler);
+  router.get('/devices/:id/sensors/intervals', verifyToken, handler.getSensorDataHandler);
+  router.get('/devices/:id/sensors/limits', verifyToken, handler.getSensorDataLimitHandler);
+  router.get('/devices/:id/sensors/downloads', verifyToken, handler.getSensorDataDownloadHandler);
 
   return router;
 };
