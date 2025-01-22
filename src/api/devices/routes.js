@@ -13,10 +13,12 @@ const deviceRoutes = (handler) => {
   router.put('/devices/:id/mqttcontrol', verifyToken, verifyAdmin, handler.putMqttControlHandler);
 
   // User (same id) & admin (all device)
-  // PERLU DIBERI MIDDLEWARE VERIFYDEVICE!!!
   router.get('/devices', verifyToken, handler.getAllDeviceHandler);
   router.get('/devices/:id', verifyToken, handler.getDeviceHandler);
   router.put('/devices/:id/control', verifyToken, handler.putDeviceControlHandler);
+  router.get('/devices/:id/sensors/interval', verifyToken, handler.getSensorDataHandler);
+  router.get('/devices/:id/sensors/limitdata', verifyToken, handler.getSensorDataLimitHandler);
+  router.get('/devices/:id/sensors/download', verifyToken, handler.getSensorDataDownloadHandler);
 
   return router;
 };
