@@ -181,7 +181,7 @@ class DevicesService {
       '60d': '60 days',
       '90d': '90 days',
     };
-    const sqlInterval = intervalMap[interval] || '1 hour'; // Default ke '1 hour'
+    const sqlInterval = intervalMap[interval];
 
     let query;
 
@@ -216,9 +216,6 @@ class DevicesService {
 
     // Eksekusi query
     const result = await this._pool.query(query);
-    if (!result.rowCount) {
-      throw new NotFoundError('Device tidak ditemukan');
-    }
 
     // Return hasil
     return result.rows;
@@ -259,10 +256,6 @@ class DevicesService {
     // Eksekusi query
     const result = await this._pool.query(query);
 
-    if (!result.rowCount) {
-      throw new NotFoundError('Device tidak ditemukan');
-    }
-
     // Return hasil
     return result.rows;
   }
@@ -282,7 +275,7 @@ class DevicesService {
       '365d': '365 days', // 1 tahun terakhir
     };
 
-    const sqlInterval = intervalMap[interval] || '1 day'; // Default ke '1d'
+    const sqlInterval = intervalMap[interval];
 
     let query;
     if (role === 'admin') {
@@ -314,9 +307,6 @@ class DevicesService {
       };
     }
     const result = await this._pool.query(query);
-    if (!result.rowCount) {
-      throw new NotFoundError('Device tidak ditemukan');
-    }
     const data = result.rows;
 
     // Konversi data ke CSV

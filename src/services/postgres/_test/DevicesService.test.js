@@ -4,6 +4,9 @@ import DevicesService from '../DevicesService.js';
 import RentalsService from '../RentalsService.js';
 import NotFoundError from '../../../exceptions/NotFoundError.js';
 import UsersTableTestHelper from '../../../../tests/UserTableHelper.js';
+import SensorTableTestHelper from '../../../../tests/SensorTableTestHelper.js';
+import DevicesTableTestHelper from '../../../../tests/DevicesTableTestHelper.js';
+import RentalsTableTestHelper from '../../../../tests/RentalsTableTestHelper.js';
 
 dotenv.config();
 
@@ -43,7 +46,10 @@ describe('DevicesService', () => {
 
   afterEach(async () => {
     // Membersihkan tabel `devices` setelah setiap test
-    await pool.query('DELETE FROM devices');
+    await DevicesTableTestHelper.cleanTable();
+    await RentalsTableTestHelper.cleanTable();
+    await UsersTableTestHelper.cleanTable();
+    await SensorTableTestHelper.cleanTable();
   });
 
   describe('addDevice function', () => {
@@ -327,6 +333,118 @@ describe('DevicesService', () => {
 
       // Action and Asser
       await expect(devicesService.deviceControl('user-123', 'user', { id: deviceId, action: 'on' })).rejects.toThrow(NotFoundError);
+    });
+  });
+  describe('getSensorData function', () => {
+    it('return all sensor data by admin based timestamp', async () => {
+      // Arrange
+      const devicesService = new DevicesService();
+      const rentalsService = new RentalsService();
+      const user1 = await UsersTableTestHelper.addUser({ id: 'user-123' });
+      const deviceId = await devicesService.addDevice();
+      const { id } = await rentalsService.addRental(addRentalPayload(user1), 'user');
+      await rentalsService.changeStatusRental(id, 'active');
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-123', deviceId });
+
+      // Actions
+      const sensors = await devicesService.getSensorData('admin-123', 'admin', deviceId, '12h');
+
+      // Assert
+      expect(sensors).toHaveLength(1);
+    });
+    it('return all sensor data by user based timestamp', async () => {
+      // Arrange
+      const devicesService = new DevicesService();
+      const rentalsService = new RentalsService();
+      const user1 = await UsersTableTestHelper.addUser({ id: 'user-123' });
+      const deviceId = await devicesService.addDevice();
+      const { id } = await rentalsService.addRental(addRentalPayload(user1), 'user');
+      await rentalsService.changeStatusRental(id, 'active');
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-123', deviceId });
+
+      // Actions
+      const sensors = await devicesService.getSensorData(user1, 'user', deviceId, '12h');
+
+      // Assert
+      expect(sensors).toHaveLength(1);
+    });
+  });
+  describe('getSensorDataLimit function', () => {
+    it('return all sensor data by admin based limit', async () => {
+      // Arrange
+      const devicesService = new DevicesService();
+      const rentalsService = new RentalsService();
+      const user1 = await UsersTableTestHelper.addUser({ id: 'user-123' });
+      const deviceId = await devicesService.addDevice();
+      const { id } = await rentalsService.addRental(addRentalPayload(user1), 'user');
+      await rentalsService.changeStatusRental(id, 'active');
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-123', deviceId });
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-111', deviceId });
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-222', deviceId });
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-333', deviceId });
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-444', deviceId });
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-555', deviceId });
+
+      // Actions
+      const sensors = await devicesService.getSensorDataLimit('admin-123', 'admin', deviceId, 5);
+
+      // Assert
+      expect(sensors).toHaveLength(5);
+    });
+    it('return all sensor data by user based timestamp', async () => {
+      // Arrange
+      const devicesService = new DevicesService();
+      const rentalsService = new RentalsService();
+      const user1 = await UsersTableTestHelper.addUser({ id: 'user-123' });
+      const deviceId = await devicesService.addDevice();
+      const { id } = await rentalsService.addRental(addRentalPayload(user1), 'user');
+      await rentalsService.changeStatusRental(id, 'active');
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-123', deviceId });
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-111', deviceId });
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-222', deviceId });
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-333', deviceId });
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-444', deviceId });
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-555', deviceId });
+
+      // Actions
+      const sensors = await devicesService.getSensorDataLimit(user1, 'user', deviceId, 5);
+
+      // Assert
+      expect(sensors).toHaveLength(5);
+    });
+  });
+  describe('getSensorDataDownload function', () => {
+    it('return all sensor data download by admin based timestamp', async () => {
+      // Arrange
+      const devicesService = new DevicesService();
+      const rentalsService = new RentalsService();
+      const user1 = await UsersTableTestHelper.addUser({ id: 'user-123' });
+      const deviceId = await devicesService.addDevice();
+      const { id } = await rentalsService.addRental(addRentalPayload(user1), 'user');
+      await rentalsService.changeStatusRental(id, 'active');
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-123', deviceId });
+
+      // Actions
+      const sensors = await devicesService.getSensorDataDownload('admin-123', 'admin', deviceId, '12h');
+
+      // Assert
+      expect(sensors).toBeDefined();
+    });
+    it('return all sensor data download by user based timestamp', async () => {
+      // Arrange
+      const devicesService = new DevicesService();
+      const rentalsService = new RentalsService();
+      const user1 = await UsersTableTestHelper.addUser({ id: 'user-123' });
+      const deviceId = await devicesService.addDevice();
+      const { id } = await rentalsService.addRental(addRentalPayload(user1), 'user');
+      await rentalsService.changeStatusRental(id, 'active');
+      await SensorTableTestHelper.addDataSensor({ sensorId: 'sensor-123', deviceId });
+
+      // Actions
+      const sensors = await devicesService.getSensorDataDownload(user1, 'user', deviceId, '12h');
+
+      // Assert
+      expect(sensors).toBeDefined();
     });
   });
 });
