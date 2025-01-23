@@ -1,7 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import '../services/cron/CleanExpiredRental.js';
-import '../services/mqtt/SensorsService.js';
 
 // plugin
 import usersPlugin from '../api/users/index.js';
