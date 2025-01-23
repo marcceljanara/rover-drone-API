@@ -1,6 +1,7 @@
 class DevicesHandler {
-  constructor({ devicesService, validator }) {
+  constructor({ devicesService, mqttPublisher, validator }) {
     this._devicesService = devicesService;
+    this._mqttPublisher = mqttPublisher;
     this._validator = validator;
 
     // Admin
@@ -128,6 +129,7 @@ class DevicesHandler {
       const response = await this._devicesService.deviceControl(userId, role, {
         id, command, action,
       });
+      await this._mqttPublisher.publishMessage(response.control_topic, req.body);
       return res.status(200).json({
         status: 'success',
         message: `device ${response.status}`,

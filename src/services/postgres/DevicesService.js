@@ -137,7 +137,7 @@ class DevicesService {
     // Jika role adalah admin, user dapat mengontrol semua device
     if (role === 'admin') {
       const query = {
-        text: 'UPDATE devices SET status = $1 WHERE id = $2 AND is_deleted = FALSE RETURNING id, status',
+        text: 'UPDATE devices SET status = $1 WHERE id = $2 AND is_deleted = FALSE RETURNING id, status, control_topic',
         values: [status, id],
       };
       const result = await this._pool.query(query);

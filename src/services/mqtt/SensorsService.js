@@ -1,7 +1,7 @@
 import pkg from 'pg';
 import { nanoid } from 'nanoid';
 import dotenv from 'dotenv';
-import createMqttClient from '../../config/mqtt/mqttClient.js';
+import MqttClient from '../../config/mqtt/mqttClient.js';
 
 // Load environment variables
 dotenv.config();
@@ -57,11 +57,13 @@ const saveSensorData = async (deviceId, data) => {
     password: process.env.MQTT_PASSWORD,
   };
 
-  // Load awal daftar topik dan buat MQTT client
-  currentTopics = await loadTopics();
-  const mqttClient = createMqttClient(mqttOptions, currentTopics, async (topic, message) => {
+  // Buat instance MqttClient
+  const mqttService = new MqttClient(mqttOptions);
+
+  // Callback untuk menangani pesan masuk
+  const handleIncomingMessage = async (topic, message) => {
     try {
-      const payload = JSON.parse(message.toString());
+      const payload = JSON.parse(message);
       const deviceId = topic.split('/')[1]; // Parsing device_id dari topik
 
       // Simpan data sensor
@@ -70,7 +72,11 @@ const saveSensorData = async (deviceId, data) => {
     } catch (err) {
       console.error('Error processing message:', err.message);
     }
-  });
+  };
+
+  // Load awal daftar topik dan subscribe
+  currentTopics = await loadTopics();
+  mqttService.subscribe(currentTopics, handleIncomingMessage);
 
   // Fungsi untuk menyegarkan topik
   const refreshTopics = async () => {
@@ -79,15 +85,8 @@ const saveSensorData = async (deviceId, data) => {
       const topicsToSubscribe = newTopics.filter((topic) => !currentTopics.includes(topic));
 
       if (topicsToSubscribe.length > 0) {
-        topicsToSubscribe.forEach((topic) => {
-          mqttClient.subscribe(topic, (err) => {
-            if (!err) {
-              console.log(`Subscribed to new topic: ${topic}`);
-            } else {
-              console.error(`Failed to subscribe to topic ${topic}:`, err.message);
-            }
-          });
-        });
+        mqttService.subscribe(topicsToSubscribe, handleIncomingMessage);
+        console.log(`Subscribed to new topics: ${topicsToSubscribe.join(', ')}`);
         currentTopics = newTopics; // Update daftar topik yang sudah disubscribe
       }
     } catch (err) {
@@ -101,7 +100,7 @@ const saveSensorData = async (deviceId, data) => {
   // Tangani penutupan aplikasi
   process.on('SIGINT', async () => {
     console.log('Disconnecting...');
-    mqttClient.end();
+    mqttService.disconnect(); // Menutup koneksi MQTT
     await dbPool.end(); // Menutup pool
     process.exit(0);
   });
