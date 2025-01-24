@@ -76,6 +76,7 @@ function createServer() {
   rentalsPlugin({
     app,
     rentalsService,
+    rabbitmqService: ProducerService,
     validator: RentalsValidator,
   });
 

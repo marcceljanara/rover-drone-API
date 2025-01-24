@@ -1,6 +1,7 @@
 class RentalsHandler {
-  constructor({ rentalsService, validator }) {
+  constructor({ rentalsService, rabbitmqService, validator }) {
     this._rentalsService = rentalsService;
+    this._rabbitmqService = rabbitmqService;
     this._validator = validator;
 
     // Admin
@@ -51,6 +52,16 @@ class RentalsHandler {
       await this._validator.validatePostAddRentalPayload(req.body);
       const { startDate, endDate } = req.body;
       const rental = await this._rentalsService.addRental({ userId, startDate, endDate }, role);
+      const message = {
+        userId,
+        rentalId: rental.id,
+        paymentId: rental.payment_id,
+        cost: rental.cost,
+        startDate,
+        endDate,
+      };
+      await this._rabbitmqService.sendMessage('rental:request', JSON.stringify(message));
+      await this._rabbitmqService.sendMessage('rental:payment', JSON.stringify(message));
       return res.status(201).json({
         status: 'success',
         message: `Berhasil mengajukan penyewaan, silahkan melakukan pembayaran sebesar ${rental.cost} dengan catatan menulis (Pembayaran ${rental.id})`,
