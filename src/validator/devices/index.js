@@ -4,6 +4,9 @@ import {
   paramsPayloadSchema,
   putDeviceControlPayloadSchema,
   putStatusDevicePayloadSchema,
+  querySensorPayloadSchema,
+  queryLimitPayloadSchema,
+  querySensorDownloadPayloadSchema,
 } from './schema.cjs';
 
 const DevicesValidator = {
@@ -27,6 +30,24 @@ const DevicesValidator = {
   },
   validatePutStatusDevicePayload: (payload) => {
     const validationResult = putStatusDevicePayloadSchema.validate(payload);
+    if (validationResult.error) {
+      throw new InvariantError(validationResult.error.message);
+    }
+  },
+  validateQuerySensorPayload: (payload) => {
+    const validationResult = querySensorPayloadSchema.validate(payload);
+    if (validationResult.error) {
+      throw new InvariantError(validationResult.error.message);
+    }
+  },
+  validateQueryLimitPayload: (payload) => {
+    const validationResult = queryLimitPayloadSchema.validate(payload);
+    if (validationResult.error) {
+      throw new InvariantError(validationResult.error.message);
+    }
+  },
+  validateQuerySensorDownloadPayload: (payload) => {
+    const validationResult = querySensorDownloadPayloadSchema.validate(payload);
     if (validationResult.error) {
       throw new InvariantError(validationResult.error.message);
     }

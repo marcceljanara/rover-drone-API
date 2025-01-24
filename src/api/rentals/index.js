@@ -2,10 +2,10 @@ import RentalsHandler from './handler.js';
 import rentalRoutes from './routes.js';
 
 const rentalsPlugin = ({
-  app, rentalsService, validator,
+  app, rentalsService, rabbitmqService, validator,
 }) => {
   const handler = new RentalsHandler({
-    rentalsService, validator,
+    rentalsService, rabbitmqService, validator,
   });
   app.use(rentalRoutes(handler));
 };

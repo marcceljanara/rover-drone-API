@@ -36,6 +36,7 @@ import TokenManager from '../tokenize/TokenManager.js';
 // Exceptions
 import ClientError from '../exceptions/ClientError.js';
 import ServerError from '../exceptions/ServerError.js';
+import PublisherService from '../services/mqtt/PublisherServiceMqtt.js';
 
 dotenv.config();
 
@@ -75,12 +76,14 @@ function createServer() {
   rentalsPlugin({
     app,
     rentalsService,
+    rabbitmqService: ProducerService,
     validator: RentalsValidator,
   });
 
   devicesPlugin({
     app,
     devicesService,
+    mqttPublisher: PublisherService,
     validator: DevicesValidator,
   });
 

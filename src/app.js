@@ -1,5 +1,6 @@
 /* istanbul ignore file */
 import createServer from './http/server.js';
+import './services/mqtt/SensorsService.js';
 
 const app = createServer();
 

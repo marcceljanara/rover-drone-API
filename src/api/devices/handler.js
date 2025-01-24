@@ -1,6 +1,7 @@
 class DevicesHandler {
-  constructor({ devicesService, validator }) {
+  constructor({ devicesService, mqttPublisher, validator }) {
     this._devicesService = devicesService;
+    this._mqttPublisher = mqttPublisher;
     this._validator = validator;
 
     // Admin
@@ -9,13 +10,14 @@ class DevicesHandler {
     this.putStatusDeviceHandler = this.putStatusDeviceHandler.bind(this);
     this.putMqttSensorHandler = this.putMqttSensorHandler.bind(this);
     this.putMqttControlHandler = this.putMqttControlHandler.bind(this);
-    // this.putRentalIdHandler = this.putRentalIdHandler.bind(this);
-    // this.deleteRentalIdHandler = this.deleteRentalIdHandler.bind(this);
 
     // User and admin
     this.getAllDeviceHandler = this.getAllDeviceHandler.bind(this);
     this.getDeviceHandler = this.getDeviceHandler.bind(this);
     this.putDeviceControlHandler = this.putDeviceControlHandler.bind(this);
+    this.getSensorDataHandler = this.getSensorDataHandler.bind(this);
+    this.getSensorDataLimitHandler = this.getSensorDataLimitHandler.bind(this);
+    this.getSensorDataDownloadHandler = this.getSensorDataDownloadHandler.bind(this);
   }
 
   async postAddDeviceHandler(req, res) {
@@ -86,38 +88,11 @@ class DevicesHandler {
     }
   }
 
-  // async putRentalIdHandler(req, res, next) {
-  //   try {
-  //     this._validator.validateParamsPayload(req.params);
-  //     this._validator.validatePutRentalIdPayload(req.body);
-  //     const { id } = req.params;
-  //     const { rental_id } = req.body;
-  //     await this._devicesService.addRentalId(id, rental_id);
-  //     return res.status(200).json({
-  //       status: 'success',
-  //       message: 'rental_id berhasil diubah',
-  //     });
-  //   } catch (error) {
-  //     console.log(error);
-  //     return next(error);
-  //   }
-  // }
-
-  // async deleteRentalIdHandler(req, res, next) {
-  //   try {
-  //     const { id } = req.params;
-  //     await this._devicesService.deleteRentalId(id);
-  //     return res.status(200).json({
-  //       status: 'success',
-  //       message: 'rental_id berhasil dihapus',
-  //     });
-  //   } catch (error) {
-  //     return next(error);
-  //   }
-  // }
-
   async getAllDeviceHandler(req, res) {
-    const devices = await this._devicesService.getAllDevice();
+    const userId = req.id;
+    const { role } = req;
+    const devices = await this._devicesService.getAllDevice(userId, role);
+    console.log(userId, role);
     return res.status(200).json({
       status: 'success',
       message: 'data device berhasil diperoleh',
@@ -127,10 +102,12 @@ class DevicesHandler {
 
   async getDeviceHandler(req, res, next) {
     try {
+      const userId = req.id;
+      const { role } = req;
       this._validator.validateParamsPayload(req.params);
       const { id } = req.params;
 
-      const device = await this._devicesService.getDevice(id);
+      const device = await this._devicesService.getDevice(userId, role, id);
 
       return res.status(200).json({
         status: 'success',
@@ -143,17 +120,76 @@ class DevicesHandler {
 
   async putDeviceControlHandler(req, res, next) {
     try {
+      const userId = req.id;
+      const { role } = req;
       this._validator.validateParamsPayload(req.params);
       this._validator.validatePutDeviceControlPayload(req.body);
       const { id } = req.params;
       const { command, action } = req.body;
-      const response = await this._devicesService.deviceControl({
+      const response = await this._devicesService.deviceControl(userId, role, {
         id, command, action,
       });
+      await this._mqttPublisher.publishMessage(response.control_topic, req.body);
       return res.status(200).json({
         status: 'success',
         message: `device ${response.status}`,
       });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async getSensorDataHandler(req, res, next) {
+    try {
+      this._validator.validateParamsPayload(req.params);
+      this._validator.validateQuerySensorPayload(req.query);
+      const { id } = req.params;
+      const userId = req.id;
+      const { role } = req;
+      const interval = req.query.interval || '1h';
+      const sensors = await this._devicesService.getSensorData(userId, role, id, interval);
+      return res.status(200).json({
+        status: 'success',
+        data: { sensors },
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async getSensorDataLimitHandler(req, res, next) {
+    try {
+      this._validator.validateParamsPayload(req.params);
+      this._validator.validateQueryLimitPayload(req.query);
+      const { id } = req.params;
+      const userId = req.id;
+      const { role } = req;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const sensors = await this._devicesService.getSensorDataLimit(userId, role, id, limit);
+      return res.status(200).json({
+        status: 'success',
+        data: { sensors },
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async getSensorDataDownloadHandler(req, res, next) {
+    try {
+      this._validator.validateQuerySensorDownloadPayload(req.query);
+      this._validator.validateParamsPayload(req.params);
+      const { id } = req.params;
+      const userId = req.id;
+      const { role } = req;
+      const interval = req.query.interval || '1h';
+      // Memanggil service untuk mendapatkan data sensor dalam format CSV
+      const csvData = await this._devicesService.getSensorDataDownload(userId, role, id, interval);
+
+      // Menyusun header file CSV dan mengirimkan sebagai response
+      res.setHeader('Content-Disposition', `attachment; filename="sensor_data_${id}_${interval}.csv"`);
+      res.setHeader('Content-Type', 'text/csv');
+      return res.status(200).send(csvData); // Mengirim file CSV
     } catch (error) {
       return next(error);
     }
