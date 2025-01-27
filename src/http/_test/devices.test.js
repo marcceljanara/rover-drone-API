@@ -3,7 +3,6 @@ import request from 'supertest';
 import dotenv from 'dotenv';
 import UsersTableTestHelper from '../../../tests/UserTableHelper.js';
 import AuthenticationsTableTestHelper from '../../../tests/AuthenticationTableHelper.js';
-import RentalsTableTestHelper from '../../../tests/RentalsTableTestHelper.js';
 import DevicesTableTestHelper from '../../../tests/DevicesTableTestHelper.js';
 import SensorTableTestHelper from '../../../tests/SensorTableTestHelper.js';
 import createServer from '../server.js';
@@ -43,7 +42,6 @@ describe('/devices endpoint', () => {
   afterEach(async () => {
     await UsersTableTestHelper.cleanTable();
     await AuthenticationsTableTestHelper.cleanTable();
-    await RentalsTableTestHelper.cleanTable();
     await DevicesTableTestHelper.cleanTable();
     await SensorTableTestHelper.cleanTable();
   });
