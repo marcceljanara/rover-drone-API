@@ -14,14 +14,10 @@ const PublisherService = {
     // Inisialisasi instance MqttClient
     const mqttService = new MqttClient(mqttOptions);
 
-    try {
-      // Publikasi pesan ke topik
-      mqttService.publish(topic, message);
+    // Publikasi pesan ke topik
+    mqttService.publish(topic, message);
 
-      console.log(`Message published to topic "${topic}":`, message);
-    } catch (err) {
-      console.error('Error while publishing message:', err.message);
-    }
+    console.log(`Message published to topic "${topic}":`, message);
   },
 
 };
