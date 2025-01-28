@@ -16,6 +16,7 @@ const PublisherService = {
 
     // Publikasi pesan ke topik
     mqttService.publish(topic, message);
+    mqttService.disconnect();
 
     console.log(`Message published to topic "${topic}":`, message);
   },
