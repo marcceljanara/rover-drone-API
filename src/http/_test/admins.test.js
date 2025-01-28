@@ -76,6 +76,26 @@ describe('/admin/management endpoint', () => {
       expect(responseJson.status).toBe('success');
       expect(responseJson.data.userId).toBeDefined();
     });
+
+    it('should respond with 400 if user already exists', async () => {
+      const requestPayload = {
+        username: 'userdummy',
+        password: 'userpassword',
+        fullname: 'User Dummy',
+        email: 'userdummy@gmail.com',
+      };
+      await UsersTableTestHelper.addUser({ email: 'userdummy@gmail.com', username: 'userdummy' });
+
+      const response = await request(server)
+        .post('/admin/management')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(requestPayload);
+
+      const responseJson = response.body;
+
+      expect(response.statusCode).toBe(400);
+      expect(responseJson.status).toBe('fail');
+    });
   });
 
   describe('GET /admin/management', () => {

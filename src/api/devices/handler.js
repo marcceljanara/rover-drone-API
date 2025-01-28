@@ -92,7 +92,6 @@ class DevicesHandler {
     const userId = req.id;
     const { role } = req;
     const devices = await this._devicesService.getAllDevice(userId, role);
-    console.log(userId, role);
     return res.status(200).json({
       status: 'success',
       message: 'data device berhasil diperoleh',
@@ -146,7 +145,7 @@ class DevicesHandler {
       const { id } = req.params;
       const userId = req.id;
       const { role } = req;
-      const interval = req.query.interval || '1h';
+      const interval = req.query.interval || '12h';
       const sensors = await this._devicesService.getSensorData(userId, role, id, interval);
       return res.status(200).json({
         status: 'success',
@@ -182,7 +181,7 @@ class DevicesHandler {
       const { id } = req.params;
       const userId = req.id;
       const { role } = req;
-      const interval = req.query.interval || '1h';
+      const interval = req.query.interval || '12h';
       // Memanggil service untuk mendapatkan data sensor dalam format CSV
       const csvData = await this._devicesService.getSensorDataDownload(userId, role, id, interval);
 

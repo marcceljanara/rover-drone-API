@@ -83,7 +83,6 @@ class PaymentsHandler {
       });
     } catch (error) {
       // Tangani error
-      console.log(error);
       return next(error);
     }
   }

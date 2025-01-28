@@ -17,7 +17,7 @@ class MqttClient {
 
     // Event handler untuk koneksi
     this._mqttClient.on('connect', () => {
-      console.log('Connected to MQTT broker');
+      // console.log('Connected to MQTT broker');
     });
 
     // Event handler untuk pesan masuk
@@ -64,7 +64,7 @@ class MqttClient {
       if (err) {
         console.error(`Failed to publish to topic ${topic}: ${err.message}`);
       } else {
-        console.log(`Published to topic: ${topic}`);
+        // console.log(`Published to topic: ${topic}`);
       }
     });
   }

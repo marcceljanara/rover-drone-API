@@ -43,6 +43,15 @@ const UsersTableTestHelper = {
     return result.rows;
   },
 
+  async findOtpUserById(id) {
+    const query = {
+      text: 'SELECT otp_code FROM users WHERE id = $1',
+      values: [id],
+    };
+    const result = await pool.query(query);
+    return result.rows[0].otp_code;
+  },
+
   async cleanTable() {
     await pool.query('DELETE FROM users WHERE 1=1');
   },
