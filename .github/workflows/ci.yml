@@ -29,6 +29,16 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
+      rabbitmq:
+        image: rabbitmq:management
+        ports:
+          - 15672:15672
+          - 5672:5672
+      mosquitto:
+        image: eclipse-mosquitto:2
+        ports:
+          - 1883:1883
+          - 9001:9001
 
     steps:
       - uses: actions/checkout@v2
@@ -36,6 +46,14 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Wait for services
+        run: |
+          echo "Waiting for PostgreSQL..."
+          until nc -z localhost 5432; do sleep 1; done
+          echo "Waiting for RabbitMQ..."
+          until nc -z localhost 15672; do sleep 1; done
+          echo "Waiting for MQTT Broker..."
+          until nc -z localhost 1883; do sleep 1; done
       - name: npm install migrate and test
         run: |
           npm install
@@ -53,3 +71,7 @@ jobs:
           ACCESS_TOKEN_KEY: secret
           REFRESH_TOKEN_KEY: terces
           ACCESS_TOKEN_AGE: 3600
+          MQTT_URL: mqtt://localhost
+          MQTT_USERNAME: test-user
+          MQTT_PASSWORD: test-password
+          RABBITMQ_SERVER: amqp://localhost
