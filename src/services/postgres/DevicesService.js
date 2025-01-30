@@ -18,8 +18,8 @@ class DevicesService {
     const status = 'inactive'; // default
 
     const query = {
-      text: 'INSERT INTO devices (id, status, last_active, sensor_topic, control_topic) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-      values: [id, status, null, mqttSensorTopic, mqttControlTopic],
+      text: 'INSERT INTO devices (id, status, sensor_topic, control_topic) VALUES ($1, $2, $3, $4) RETURNING id',
+      values: [id, status, mqttSensorTopic, mqttControlTopic],
     };
     const result = await this._pool.query(query);
     return result.rows[0].id;
@@ -80,7 +80,19 @@ class DevicesService {
     // Jika role adalah admin, user dapat mengakses semua device
     if (role === 'admin') {
       const query = {
-        text: 'SELECT id, rental_id, status, last_reported_issue, last_active FROM devices WHERE is_deleted = FALSE',
+        text: `
+          SELECT 
+            id, 
+            rental_id, 
+            status, 
+            last_reported_issue, 
+            TO_CHAR(
+              make_interval(secs => last_active), 
+              'DD "Hari" HH24:MI:SS'
+            ) AS last_active
+          FROM devices 
+          WHERE is_deleted = FALSE
+        `,
       };
       const result = await this._pool.query(query);
       return result.rows;
@@ -89,10 +101,20 @@ class DevicesService {
     // Untuk user biasa, hanya akses device berdasarkan rental aktif miliknya
     const query = {
       text: `
-        SELECT devices.id, devices.rental_id, devices.status, devices.last_reported_issue, devices.last_active
+        SELECT 
+          devices.id, 
+          devices.rental_id, 
+          devices.status, 
+          devices.last_reported_issue, 
+          TO_CHAR(
+            make_interval(secs => devices.last_active), 
+            'DD "Hari" HH24:MI:SS'
+          ) AS last_active
         FROM devices
         INNER JOIN rentals ON devices.rental_id = rentals.id
-        WHERE rentals.user_id = $1 AND rentals.rental_status = 'active' AND devices.is_deleted = FALSE
+        WHERE rentals.user_id = $1 
+          AND rentals.rental_status = 'active' 
+          AND devices.is_deleted = FALSE
       `,
       values: [userId],
     };
@@ -104,10 +126,18 @@ class DevicesService {
     // Default query untuk user biasa
     let query = {
       text: `
-        SELECT devices.* 
+        SELECT 
+          devices.*, 
+          TO_CHAR(
+            make_interval(secs => devices.last_active), 
+            'DD "Hari" HH24:MI:SS'
+          ) AS last_active
         FROM devices
         INNER JOIN rentals ON devices.rental_id = rentals.id
-        WHERE devices.id = $1 AND rentals.user_id = $2 AND rentals.rental_status = 'active' AND devices.is_deleted = FALSE
+        WHERE devices.id = $1 
+          AND rentals.user_id = $2 
+          AND rentals.rental_status = 'active' 
+          AND devices.is_deleted = FALSE
       `,
       values: [deviceId, userId],
     };
@@ -115,7 +145,17 @@ class DevicesService {
     // Jika role adalah admin, gunakan query berbeda
     if (role === 'admin') {
       query = {
-        text: 'SELECT * FROM devices WHERE id = $1 AND is_deleted = FALSE',
+        text: `
+          SELECT 
+            *, 
+            TO_CHAR(
+              make_interval(secs => last_active), 
+              'DD "Hari" HH24:MI:SS'
+            ) AS last_active
+          FROM devices 
+          WHERE id = $1 
+            AND is_deleted = FALSE
+        `,
         values: [deviceId],
       };
     }

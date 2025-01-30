@@ -26,7 +26,8 @@ exports.up = (pgm) => {
       default: null, // Tidak wajib diisi
     },
     last_active: {
-      type: 'TIMESTAMP',
+      type: 'INTEGER',
+      default: 0,
       notNull: false,
     },
     sensor_topic: {

@@ -25,17 +25,21 @@ const loadTopics = async () => {
 };
 
 // Fungsi untuk menyimpan data sensor ke tabel sensordata
-const saveSensorData = async (deviceId, data) => {
+const saveSensorDataAndUpdateTime = async (deviceId, data) => {
   const {
-    timestamp, temperature, humidity, light_intensity,
+    timestamp, temperature, humidity, light_intensity, time_active,
   } = data;
+
   const client = await dbPool.connect();
   try {
-    const query = `
+    await client.query('BEGIN'); // Mulai transaksi
+
+    // Simpan data sensor
+    const insertQuery = `
       INSERT INTO sensordata (id, device_id, timestamp, temperature, humidity, light_intensity)
       VALUES ($1, $2, $3, $4, $5, $6)
     `;
-    const values = [
+    const insertValues = [
       `${nanoid(16)}`,
       deviceId,
       new Date(timestamp),
@@ -43,9 +47,23 @@ const saveSensorData = async (deviceId, data) => {
       humidity || null,
       light_intensity || null,
     ];
-    await client.query(query, values);
+    await client.query(insertQuery, insertValues);
+
+    // Update akumulasi waktu aktif perangkat
+    const updateQuery = `
+      UPDATE devices
+      SET last_active = COALESCE(last_active, 0) + $1
+      WHERE id = $2
+    `;
+    const updateValues = [time_active, deviceId];
+    await client.query(updateQuery, updateValues);
+
+    await client.query('COMMIT'); // Commit transaksi
+  } catch (error) {
+    await client.query('ROLLBACK'); // Rollback jika ada error
+    console.error(error);
   } finally {
-    client.release(); // Mengembalikan koneksi ke pool
+    client.release();
   }
 };
 
@@ -67,7 +85,7 @@ const saveSensorData = async (deviceId, data) => {
       const deviceId = topic.split('/')[1]; // Parsing device_id dari topik
 
       // Simpan data sensor
-      await saveSensorData(deviceId, payload);
+      await saveSensorDataAndUpdateTime(deviceId, payload);
       console.log(`Data saved for device: ${deviceId}`);
     } catch (err) {
       console.error('Error processing message:', err.message);
