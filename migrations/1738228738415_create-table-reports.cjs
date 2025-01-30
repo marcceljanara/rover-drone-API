@@ -32,6 +32,10 @@ exports.up = (pgm) => {
       type: 'TIMESTAMP',
       default: pgm.func('current_timestamp'),
     },
+    report_interval: {
+      type: 'TEXT',
+      notNull: true,
+    },
   });
 };
 
