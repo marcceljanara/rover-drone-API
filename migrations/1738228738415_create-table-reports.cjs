@@ -32,8 +32,12 @@ exports.up = (pgm) => {
       type: 'TIMESTAMP',
       default: pgm.func('current_timestamp'),
     },
-    report_interval: {
-      type: 'TEXT',
+    start_date: {
+      type: 'DATE',
+      notNull: true,
+    },
+    end_date: {
+      type: 'DATE',
       notNull: true,
     },
   });
