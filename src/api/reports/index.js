@@ -1,7 +1,7 @@
 import ReportsHandler from './handler.js';
 import reportRoutes from './routes.js';
 
-const reportPlugin = ({
+const reportsPlugin = ({
   app, reportsService, validator,
 }) => {
   const handler = new ReportsHandler({
@@ -10,4 +10,4 @@ const reportPlugin = ({
   app.use(reportRoutes(handler));
 };
 
-export default reportPlugin;
+export default reportsPlugin;

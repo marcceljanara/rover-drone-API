@@ -1,6 +1,6 @@
 import express from 'express';
 import verifyToken from '../../middleware/verifyToken.js';
-import verifyAdmin from '../../middleware/verifyAdmin';
+import verifyAdmin from '../../middleware/verifyAdmin.js';
 
 const reportRoutes = (handler) => {
   const router = express.Router();
