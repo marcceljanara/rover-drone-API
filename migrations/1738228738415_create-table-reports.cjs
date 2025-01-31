@@ -33,11 +33,11 @@ exports.up = (pgm) => {
       default: pgm.func('current_timestamp'),
     },
     start_date: {
-      type: 'DATE',
+      type: 'TIMESTAMP',
       notNull: true,
     },
     end_date: {
-      type: 'DATE',
+      type: 'TIMESTAMP',
       notNull: true,
     },
   });
