@@ -60,7 +60,11 @@ class ReportsService {
 
   async getAllReport() {
     const query = {
-      text: `SELECT id, report_interval, report_date, total_transactions 
+      text: `SELECT id,
+      report_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Jakarta' AS report_date, 
+      total_transactions, 
+      start_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Jakarta' AS start_date, 
+      end_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Jakarta' AS end_date
       FROM reports`,
       values: [],
     };
@@ -70,7 +74,9 @@ class ReportsService {
 
   async getReport(id) {
     const query = {
-      text: 'SELECT * FROM reports WHERE id = $1',
+      text: `SELECT *,
+      report_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Jakarta' AS report_date 
+      FROM reports WHERE id = $1`,
       values: [id],
     };
     const result = await this._pool.query(query);
@@ -84,7 +90,12 @@ class ReportsService {
     const report = result.rows[0];
 
     const paymentQuery = {
-      text: `SELECT id, rental_id, amount, payment_date, payment_status, payment_method 
+      text: `SELECT id,
+       rental_id,
+        amount,
+        payment_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Jakarta' AS payment_date,
+        payment_status, 
+        payment_method 
         FROM payments 
         WHERE payment_date BETWEEN $1 AND $2 
         AND payment_status = 'completed' 
