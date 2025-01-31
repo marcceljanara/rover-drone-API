@@ -48,10 +48,11 @@ class ReportsHandler {
     try {
       this._validator.validateParamsPayload(req.params);
       const { id } = req.params;
-      const report = await this._reportsService.downloadReportPdf(id);
-      return res.status(200).download(report);
+
+      // Panggil service yang langsung meng-stream PDF ke response
+      await this._reportsService.downloadReportPdf(id, res);
     } catch (error) {
-      return next(error);
+      next(error);
     }
   }
 
